@@ -24,6 +24,7 @@ CANVAS: Color = Color.from_int(0xFAFAFA)
 STICKY_TEXT_COLOR: Color = Color.from_int(0x0D0D0D)
 STICKY_PADDING: float = 16.0
 
+
 class SizeStyle(Enum):
     SMALL: str = "small"
     S: str = "s"
@@ -32,6 +33,7 @@ class SizeStyle(Enum):
     LARGE: str = "large"
     L: str = "l"
     XL: str = "xl"
+
 
 STROKE_WIDTHS: Dict[SizeStyle, float] = {
     SizeStyle.SMALL: 2.0,
@@ -70,13 +72,18 @@ class ColorStyle(Enum):
     WHITE: str = "white"
     LIGHT_GRAY: str = "lightGray"
     GRAY: str = "gray"
+    GREY: str = "grey"
     BLACK: str = "black"
     GREEN: str = "green"
+    LIGHT_GREEN: str = "light-green"
     CYAN: str = "cyan"
     BLUE: str = "blue"
+    LIGHT_BLUE: str = "light-blue"
     INDIGO: str = "indigo"
     VIOLET: str = "violet"
+    LIGHT_VIOLET: str = "light-violet"
     RED: str = "red"
+    LIGHT_RED: str = "light-red"
     ORANGE: str = "orange"
     YELLOW: str = "yellow"
 
@@ -85,13 +92,18 @@ COLORS: Dict[ColorStyle, Color] = {
     ColorStyle.WHITE: Color.from_int(0x1D1D1D),
     ColorStyle.LIGHT_GRAY: Color.from_int(0xC6CBD1),
     ColorStyle.GRAY: Color.from_int(0x788492),
+    ColorStyle.GREY: Color.from_int(0x9EA6B0),
     ColorStyle.BLACK: Color.from_int(0x1D1D1D),
     ColorStyle.GREEN: Color.from_int(0x36B24D),
+    ColorStyle.LIGHT_GREEN: Color.from_int(0x38B845),
     ColorStyle.CYAN: Color.from_int(0x0E98AD),
     ColorStyle.BLUE: Color.from_int(0x1C7ED6),
+    ColorStyle.LIGHT_BLUE: Color.from_int(0x4099F5),
     ColorStyle.INDIGO: Color.from_int(0x4263EB),
     ColorStyle.VIOLET: Color.from_int(0x7746F1),
+    ColorStyle.LIGHT_VIOLET: Color.from_int(0x9C1FBE),
     ColorStyle.RED: Color.from_int(0xFF2133),
+    ColorStyle.LIGHT_RED: Color.from_int(0xFC7075),
     ColorStyle.ORANGE: Color.from_int(0xFF9433),
     ColorStyle.YELLOW: Color.from_int(0xFFC936),
 }
