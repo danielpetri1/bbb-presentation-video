@@ -48,6 +48,7 @@ class ShapeData(TypedDict, total=False):
     text: str
     type: str
     userId: str
+    opacity: float
 
 
 class AddShapeEvent(TypedDict):

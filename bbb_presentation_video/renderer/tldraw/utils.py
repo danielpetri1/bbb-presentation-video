@@ -19,35 +19,48 @@ from bbb_presentation_video.renderer.tldraw import vec
 
 DrawPoints = List[Union[Tuple[float, float], Tuple[float, float, float]]]
 
-
 CANVAS: Color = Color.from_int(0xFAFAFA)
 
 STICKY_TEXT_COLOR: Color = Color.from_int(0x0D0D0D)
 STICKY_PADDING: float = 16.0
 
-
 class SizeStyle(Enum):
     SMALL: str = "small"
+    S: str = "s"
     MEDIUM: str = "medium"
+    M: str = "m"
     LARGE: str = "large"
-
+    L: str = "l"
+    XL: str = "xl"
 
 STROKE_WIDTHS: Dict[SizeStyle, float] = {
     SizeStyle.SMALL: 2.0,
+    SizeStyle.S: 2.0,
     SizeStyle.MEDIUM: 3.5,
+    SizeStyle.M: 3.5,
     SizeStyle.LARGE: 5.0,
+    SizeStyle.L: 5.0,
+    SizeStyle.XL: 6.5,
 }
 
 FONT_SIZES: Dict[SizeStyle, float] = {
     SizeStyle.SMALL: 28,
+    SizeStyle.S: 28,
     SizeStyle.MEDIUM: 48,
+    SizeStyle.M: 48,
     SizeStyle.LARGE: 96,
+    SizeStyle.L: 96,
+    SizeStyle.XL: 128,
 }
 
 STICKY_FONT_SIZES: Dict[SizeStyle, float] = {
     SizeStyle.SMALL: 24,
+    SizeStyle.S: 24,
     SizeStyle.MEDIUM: 36,
+    SizeStyle.M: 36,
     SizeStyle.LARGE: 48,
+    SizeStyle.L: 48,
+    SizeStyle.XL: 60,
 }
 
 LETTER_SPACING: float = -0.03  # em
@@ -157,6 +170,7 @@ class Style:
     scale: float = 1
     font: FontStyle = FontStyle.SCRIPT
     textAlign: AlignStyle = AlignStyle.MIDDLE
+    opacity: float = 1
 
     def update_from_data(self, data: StyleData) -> None:
         if "color" in data:
@@ -173,6 +187,8 @@ class Style:
             self.font = FontStyle(data["font"])
         if "textAlign" in data:
             self.textAlign = AlignStyle(data["textAlign"])
+        if "opacity" in data:
+            self.opacity = data["opacity"]
 
 
 class Decoration(Enum):

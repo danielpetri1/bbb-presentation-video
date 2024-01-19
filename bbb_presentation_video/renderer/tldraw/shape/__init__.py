@@ -36,12 +36,17 @@ class BaseShapeProto(Protocol):
     def update_from_data(self, data: ShapeData) -> None:
         if "style" in data:
             self.style.update_from_data(data["style"])
+        elif "props" in data:
+            self.style.update_from_data(data["props"])
+
         if "childIndex" in data:
             self.childIndex = data["childIndex"]
+        
         if "point" in data:
             point = data["point"]
             self.point = Position(point[0], point[1])
-
+        elif "x" in data and "y" in data:
+            self.point = Position(data["x"], data["y"])
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class SizedShapeProto(BaseShapeProto, Protocol):
@@ -115,9 +120,20 @@ class DrawShape(RotatableShapeProto):
                     self.points.append((point[0], point[1], point[2]))
                 else:
                     self.points.append((point[0], point[1]))
+
+        elif "props" in data and "segments" in data["props"]:
+            self.points = []
+            for segment in data["props"]["segments"]:
+                for point in segment["points"]:
+                    if len(point) == 3:    
+                        self.points.append((point['x'], point['y'], point['z']))
+                    else:
+                        self.points.append((point['x'], point['y']))
+
         if "isComplete" in data:
             self.isComplete = data["isComplete"]
-
+        elif "props" in data and "isComplete" in data['props']:
+            self.isComplete = data['props']['isComplete']
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class RectangleShape(LabelledShapeProto):
