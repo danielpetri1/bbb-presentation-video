@@ -86,6 +86,7 @@ class ColorStyle(Enum):
     LIGHT_RED: str = "light-red"
     ORANGE: str = "orange"
     YELLOW: str = "yellow"
+    SEMI: str = "semi"
 
 
 COLORS: Dict[ColorStyle, Color] = {
@@ -106,6 +107,7 @@ COLORS: Dict[ColorStyle, Color] = {
     ColorStyle.LIGHT_RED: Color.from_int(0xFC7075),
     ColorStyle.ORANGE: Color.from_int(0xFF9433),
     ColorStyle.YELLOW: Color.from_int(0xFFC936),
+    ColorStyle.SEMI: Color.from_int(0xF5F9F7),
 }
 
 STICKY_FILLS: Dict[ColorStyle, Color] = dict(
@@ -173,16 +175,24 @@ class AlignStyle(Enum):
     JUSTIFY: str = "justify"
 
 
+class FillStyle(Enum):
+    NONE: str = "none"
+    SEMI: str = "semi"
+    SOLID: str = "solid"
+    PATTERN: str = "pattern"
+
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class Style:
     color: ColorStyle = ColorStyle.BLACK
     size: SizeStyle = SizeStyle.SMALL
     dash: DashStyle = DashStyle.DRAW
     isFilled: bool = False
+    isClosed: bool = False
     scale: float = 1
     font: FontStyle = FontStyle.SCRIPT
     textAlign: AlignStyle = AlignStyle.MIDDLE
-    opacity: float = 1
+    fill: str = FillStyle.NONE
 
     def update_from_data(self, data: StyleData) -> None:
         if "color" in data:
@@ -193,6 +203,10 @@ class Style:
             self.dash = DashStyle(data["dash"])
         if "isFilled" in data:
             self.isFilled = data["isFilled"]
+        if "isClosed" in data:
+            self.isClosed = data["isClosed"]
+        if "fill" in data:
+            self.fill = FillStyle(data["fill"])
         if "scale" in data:
             self.scale = data["scale"]
         if "font" in data:

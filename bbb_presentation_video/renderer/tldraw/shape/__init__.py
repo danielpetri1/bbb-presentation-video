@@ -26,6 +26,7 @@ class BaseShapeProto(Protocol):
     """Unsure: possibly z-position of this shape within a group?"""
     point: Position = Position(0, 0)
     """Position of the origin of the shape."""
+    opacity: float = 1.0
 
     @classmethod
     def from_data(cls: Type[BaseShapeSelf], data: ShapeData) -> BaseShapeSelf:
@@ -47,6 +48,9 @@ class BaseShapeProto(Protocol):
             self.point = Position(point[0], point[1])
         elif "x" in data and "y" in data:
             self.point = Position(data["x"], data["y"])
+
+        if "opacity" in data:
+            self.opacity = data["opacity"]
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)

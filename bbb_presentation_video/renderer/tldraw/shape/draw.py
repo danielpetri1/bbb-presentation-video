@@ -17,7 +17,10 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     FILLS,
     STROKE_WIDTHS,
     STROKES,
+    COLORS,
     DashStyle,
+    FillStyle,
+    ColorStyle,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
     draw_stroke_points,
@@ -48,7 +51,7 @@ def finalize_draw(
     if very_small:
         sw = 1 + stroke_width
         ctx.arc(0, 0, sw, 0, tau)
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
         ctx.fill_preserve()
         ctx.set_line_cap(cairo.LineCap.ROUND)
         ctx.set_line_join(cairo.LineJoin.ROUND)
@@ -60,7 +63,7 @@ def finalize_draw(
         style.isFilled
         and len(points) > 3
         and vec.dist(points[0], points[-1]) < stroke_width * 2
-    )
+    ) or (style.isClosed and style.fill is not FillStyle.NONE)
 
     stroke_points = draw_stroke_points(shape.points, stroke_width, is_complete)
 
@@ -68,7 +71,10 @@ def finalize_draw(
         # Shape is configured to be filled, and is fillable
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
 
-        ctx.set_source_rgb(fill.r, fill.g, fill.b)
+        if style.fill is FillStyle.SEMI:
+            fill = COLORS[ColorStyle.SEMI]
+
+        ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
         ctx.fill()
 
     if style.dash is DashStyle.DRAW:
@@ -94,13 +100,14 @@ def finalize_draw(
 
         draw_smooth_path(ctx, stroke_outline_points)
 
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
         ctx.fill_preserve()
 
         ctx.set_line_cap(cairo.LineCap.ROUND)
         ctx.set_line_join(cairo.LineJoin.ROUND)
         ctx.set_line_width(stroke_width / 2)
         ctx.stroke()
+
     else:
         # Normal stroked path, possibly with dash or dot pattern
         if style.dash is DashStyle.DOTTED:
@@ -113,5 +120,5 @@ def finalize_draw(
         ctx.set_line_cap(cairo.LineCap.ROUND)
         ctx.set_line_join(cairo.LineJoin.ROUND)
         ctx.set_line_width(1 + stroke_width * 1.5)
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
         ctx.stroke()
