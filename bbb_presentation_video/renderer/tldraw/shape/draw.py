@@ -39,7 +39,6 @@ def finalize_draw(
     points = shape.points
     style = shape.style
     is_complete = shape.isComplete
-
     stroke = STROKES[style.color]
     fill = FILLS[style.color]
     stroke_width = STROKE_WIDTHS[style.size]
@@ -83,8 +82,7 @@ def finalize_draw(
         if len(shape.points[0]) == 2:
             simulate_pressure = True
         else:
-            # Work around python/mypy#1178
-            first_point = cast(Tuple[float, float, float], shape.points[0])
+            first_point = shape.points[0]
             if first_point[2] == 0.5:
                 simulate_pressure = True
 

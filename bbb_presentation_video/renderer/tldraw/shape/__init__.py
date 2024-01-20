@@ -11,7 +11,11 @@ import cairo
 
 from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.events.tldraw import HandleData, ShapeData
-from bbb_presentation_video.renderer.tldraw.utils import Decoration, DrawPoints, Style
+from bbb_presentation_video.renderer.tldraw.utils import (
+    Decoration,
+    DrawPoints,
+    Style,
+)
 
 BaseShapeSelf = TypeVar("BaseShapeSelf", bound="BaseShapeProto")
 
@@ -27,6 +31,7 @@ class BaseShapeProto(Protocol):
     point: Position = Position(0, 0)
     """Position of the origin of the shape."""
     opacity: float = 1.0
+    """Opacity of the shape."""
 
     @classmethod
     def from_data(cls: Type[BaseShapeSelf], data: ShapeData) -> BaseShapeSelf:
@@ -129,11 +134,13 @@ class DrawShape(RotatableShapeProto):
         elif "props" in data and "segments" in data["props"]:
             self.points = []
             for segment in data["props"]["segments"]:
-                for point in segment["points"]:
-                    if len(point) == 3:
-                        self.points.append((point["x"], point["y"], point["z"]))
-                    else:
-                        self.points.append((point["x"], point["y"]))
+                if isinstance(segment, dict) and "points" in segment and isinstance(segment["points"], list):
+                    for point in segment["points"]:
+                        if isinstance(point, dict) and "x" in point and "y" in point:
+                            if "z" in point:
+                                self.points.append((point["x"], point["y"], point["z"]))
+                            else:
+                                self.points.append((point["x"], point["y"]))
 
         if "isComplete" in data:
             self.isComplete = data["isComplete"]

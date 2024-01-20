@@ -11,13 +11,19 @@ from bbb_presentation_video.events.helpers import Position, xml_subelement
 
 
 class StyleData(TypedDict, total=False):
-    color: str
     dash: str
     font: str
     isFilled: bool
     scale: float
-    size: str
     textAlign: str
+    opacity: float
+    isPen: bool
+    isComplete: bool
+    fill: str
+    color: str
+    size: str
+    isClosed: bool
+    segments: List[List[float]]
 
 
 class HandleData(TypedDict, total=False):
@@ -48,6 +54,10 @@ class ShapeData(TypedDict, total=False):
     text: str
     type: str
     userId: str
+    x: float
+    y: float
+    opacity: float
+    props: StyleData
 
 
 class AddShapeEvent(TypedDict):

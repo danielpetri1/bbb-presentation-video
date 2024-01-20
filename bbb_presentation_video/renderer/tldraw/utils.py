@@ -192,7 +192,9 @@ class Style:
     scale: float = 1
     font: FontStyle = FontStyle.SCRIPT
     textAlign: AlignStyle = AlignStyle.MIDDLE
-    fill: str = FillStyle.NONE
+    opacity: float = 1
+    isPen: bool = False
+    fill: FillStyle = FillStyle.NONE
 
     def update_from_data(self, data: StyleData) -> None:
         if "color" in data:
@@ -203,10 +205,6 @@ class Style:
             self.dash = DashStyle(data["dash"])
         if "isFilled" in data:
             self.isFilled = data["isFilled"]
-        if "isClosed" in data:
-            self.isClosed = data["isClosed"]
-        if "fill" in data:
-            self.fill = FillStyle(data["fill"])
         if "scale" in data:
             self.scale = data["scale"]
         if "font" in data:
@@ -216,6 +214,13 @@ class Style:
         if "opacity" in data:
             self.opacity = data["opacity"]
 
+        # Tldraw v2 props not present in v1
+        if "isPen" in data:
+            self.isPen = data["isPen"]
+        if "isClosed" in data:
+            self.isClosed = data["isClosed"]
+        if "fill" in data:
+            self.fill = FillStyle(data["fill"])
 
 class Decoration(Enum):
     ARROW: str = "arrow"
