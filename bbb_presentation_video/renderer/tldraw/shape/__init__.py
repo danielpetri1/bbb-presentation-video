@@ -134,7 +134,11 @@ class DrawShape(RotatableShapeProto):
         elif "props" in data and "segments" in data["props"]:
             self.points = []
             for segment in data["props"]["segments"]:
-                if isinstance(segment, dict) and "points" in segment and isinstance(segment["points"], list):
+                if (
+                    isinstance(segment, dict)
+                    and "points" in segment
+                    and isinstance(segment["points"], list)
+                ):
                     for point in segment["points"]:
                         if isinstance(point, dict) and "x" in point and "y" in point:
                             if "z" in point:

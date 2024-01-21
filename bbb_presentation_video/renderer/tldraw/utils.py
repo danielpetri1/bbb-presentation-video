@@ -222,6 +222,7 @@ class Style:
         if "fill" in data:
             self.fill = FillStyle(data["fill"])
 
+
 class Decoration(Enum):
     ARROW: str = "arrow"
 
@@ -396,3 +397,36 @@ def draw_smooth_stroke_point_path(
 ) -> None:
     outline_points = list(map(lambda p: p["point"], points))
     draw_smooth_path(ctx, outline_points, closed)
+
+
+def pattern_fill(fill: Color) -> cairo.SurfacePattern:
+    surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 8, 8)
+    ctx = cairo.Context(surface)
+
+    # Draw the hash pattern
+    ctx.rectangle(0, 0, 8, 8)
+
+    # Set the background to white
+    ctx.set_source_rgb(1, 1, 1)
+    ctx.fill_preserve()
+
+    ctx.set_line_cap(cairo.LINE_CAP_ROUND)
+
+    # Set the pattern fill color
+    ctx.set_source_rgb(fill.r, fill.g, fill.b)
+
+    # Draw the hash lines
+    ctx.move_to(0.66, 2)
+    ctx.line_to(2, 0.66)
+    ctx.move_to(3.33, 4.66)
+    ctx.line_to(4.66, 3.33)
+    ctx.move_to(6, 7.33)
+    ctx.line_to(7.33, 6)
+
+    ctx.set_line_width(1)
+    ctx.stroke()
+
+    pattern = cairo.SurfacePattern(surface)
+    pattern.set_extend(cairo.EXTEND_REPEAT)
+
+    return pattern

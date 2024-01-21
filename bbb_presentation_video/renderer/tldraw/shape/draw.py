@@ -24,6 +24,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     draw_smooth_path,
     draw_smooth_stroke_point_path,
     draw_stroke_points,
+    pattern_fill,
 )
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
@@ -72,8 +73,14 @@ def finalize_draw(
 
         if style.fill is FillStyle.SEMI:
             fill = COLORS[ColorStyle.SEMI]
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
+        elif style.fill is FillStyle.PATTERN:
+            pattern = pattern_fill(fill)
+            ctx.set_source(pattern)
+        else:
+            # Solid fill
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
 
-        ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
         ctx.fill()
 
     if style.dash is DashStyle.DRAW:
