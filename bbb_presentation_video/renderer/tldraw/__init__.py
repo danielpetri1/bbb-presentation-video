@@ -21,6 +21,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     DrawShape,
     EllipseShape,
     GroupShape,
+    LineShape,
     RectangleShape,
     Shape,
     StickyShape,
@@ -32,6 +33,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
 from bbb_presentation_video.renderer.tldraw.shape.arrow import finalize_arrow
 from bbb_presentation_video.renderer.tldraw.shape.draw import finalize_draw
 from bbb_presentation_video.renderer.tldraw.shape.ellipse import finalize_ellipse
+from bbb_presentation_video.renderer.tldraw.shape.line import finalize_line
 from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rectangle
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_text
@@ -240,6 +242,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, ArrowShape):
                     finalize_arrow(ctx, id, shape)
+                elif isinstance(shape, LineShape):
+                    finalize_line(ctx, id, shape)
                 elif isinstance(shape, TextShape):
                     finalize_text(ctx, id, shape)
                 elif isinstance(shape, StickyShape):

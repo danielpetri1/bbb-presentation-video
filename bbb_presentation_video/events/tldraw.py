@@ -17,7 +17,6 @@ class StyleData(TypedDict, total=False):
     scale: float
     textAlign: str
     opacity: float
-    isPen: bool
     isComplete: bool
     fill: str
     color: str
@@ -32,6 +31,16 @@ class HandleData(TypedDict, total=False):
     point: List[float]
     canBind: bool
     bindingId: str
+    type: str
+    x: float
+    y: float
+
+
+class PropsData(StyleData, total=False):
+    handles: Dict[str, HandleData]
+    spline: str
+    arrowheadStart: str
+    arrowheadEnd: str
 
 
 class ShapeData(TypedDict, total=False):
@@ -57,7 +66,7 @@ class ShapeData(TypedDict, total=False):
     x: float
     y: float
     opacity: float
-    props: StyleData
+    props: PropsData
 
 
 class AddShapeEvent(TypedDict):

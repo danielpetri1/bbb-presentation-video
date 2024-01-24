@@ -157,6 +157,7 @@ class FontStyle(Enum):
     ERIF: str = "erif"  # Old tldraw versions had this spelling mistake
     SERIF: str = "serif"
     MONO: str = "mono"
+    DRAW: str = "draw"
 
 
 FONT_FACES: Dict[FontStyle, str] = {
@@ -165,6 +166,7 @@ FONT_FACES: Dict[FontStyle, str] = {
     FontStyle.ERIF: "Crimson Pro",
     FontStyle.SERIF: "Crimson Pro",
     FontStyle.MONO: "Source Code Pro",
+    FontStyle.DRAW: "Caveat Brush",
 }
 
 
@@ -193,7 +195,6 @@ class Style:
     font: FontStyle = FontStyle.SCRIPT
     textAlign: AlignStyle = AlignStyle.MIDDLE
     opacity: float = 1
-    isPen: bool = False
     fill: FillStyle = FillStyle.NONE
 
     def update_from_data(self, data: StyleData) -> None:
@@ -214,9 +215,7 @@ class Style:
         if "opacity" in data:
             self.opacity = data["opacity"]
 
-        # Tldraw v2 props not present in v1
-        if "isPen" in data:
-            self.isPen = data["isPen"]
+        # Tldraw v2 style props not present in v1
         if "isClosed" in data:
             self.isClosed = data["isClosed"]
         if "fill" in data:
@@ -225,6 +224,7 @@ class Style:
 
 class Decoration(Enum):
     ARROW: str = "arrow"
+    NONE: str = "none"
 
 
 def perimeter_of_ellipse(rx: float, ry: float) -> float:
@@ -335,6 +335,35 @@ def bezier_quad_to_cube(
         vec.add(qp0, vec.mul(vec.sub(qp1, qp0), 2 / 3)),
         vec.add(qp2, vec.mul(vec.sub(qp1, qp2), 2 / 3)),
     )
+
+
+def bezier_length(start: Position, control: Position, end: Position, num_segments: int = 10) -> float:
+    """Approximate the length of a cubic Bézier curve."""
+    length = 0.0
+    t_values = [i / num_segments for i in range(num_segments + 1)]
+    last_point = start
+
+    for t in t_values[1:]:
+        # Calculate the next point on the curve
+        x = (
+            (1 - t) ** 3 * start.x
+            + 3 * (1 - t) ** 2 * t * control.x
+            + 3 * (1 - t) * t**2 * control.x
+            + t**3 * end.x
+        )
+        y = (
+            (1 - t) ** 3 * start.y
+            + 3 * (1 - t) ** 2 * t * control.y
+            + 3 * (1 - t) * t**2 * control.y
+            + t**3 * end.y
+        )
+        next_point = Position(x, y)
+
+        # Add the distance from the last point to the current point
+        length += vec.dist(last_point, next_point)
+        last_point = next_point
+
+    return length
 
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)

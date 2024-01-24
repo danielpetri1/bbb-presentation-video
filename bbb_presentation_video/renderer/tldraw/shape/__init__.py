@@ -215,30 +215,43 @@ class ArrowHandles:
     start: Position
     bend: Position
     end: Position
+    controlPoint: Optional[Position]
 
     def __init__(
         self,
         start: Position = Position(0.0, 0.0),
         bend: Position = Position(0.5, 0.5),
         end: Position = Position(1.0, 1.0),
+        controlPoint: Position = None,
     ) -> None:
         self.start = start
         self.bend = bend
         self.end = end
+        self.controlPoint = controlPoint
 
     def update_from_data(self, data: Dict[str, HandleData]) -> None:
-        try:
-            self.start = Position(data["start"]["point"])
-        except KeyError:
-            pass
-        try:
-            self.bend = Position(data["bend"]["point"])
-        except KeyError:
-            pass
-        try:
-            self.end = Position(data["end"]["point"])
-        except KeyError:
-            pass
+
+        if "start" in data:
+            if "point" in data["start"]:
+                self.start = Position(data["start"]["point"])
+            elif "x" in data["start"] and "y" in data["start"]:
+                self.start = Position(data["start"]["x"], data["start"]["y"])
+
+        if "bend" in data:
+            if "point" in data["bend"]:
+                self.bend = Position(data["bend"]["point"])
+
+        if "end" in data:
+            if "point" in data["end"]:
+                self.end = Position(data["end"]["point"])
+            elif "x" in data["end"] and "y" in data["end"]:
+                self.end = Position(data["end"]["x"], data["end"]["y"])
+
+        if "handle:a1V" in data:
+            if "x" in data["handle:a1V"] and "y" in data["handle:a1V"]:
+                self.controlPoint = Position(
+                    data["handle:a1V"]["x"], data["handle:a1V"]["y"]
+                )
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
@@ -272,6 +285,22 @@ class ArrowShape(LabelledShapeProto):
             self.decorations.update_from_data(data["decorations"])
 
 
+@attr.s(order=False, slots=True, auto_attribs=True)
+class LineShape(LabelledShapeProto):
+    handles: ArrowHandles = attr.Factory(ArrowHandles)
+    """Locations of the line start, end, and bend points."""
+    spline: str = "line"
+
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
+        if "props" in data:
+            if "handles" in data["props"]:
+                self.handles.update_from_data(data["props"]["handles"])
+            if "spline" in data["props"]:
+                self.spline = data["props"]["spline"]
+
+
 Shape = Union[
     DrawShape,
     RectangleShape,
@@ -281,6 +310,7 @@ Shape = Union[
     TextShape,
     GroupShape,
     StickyShape,
+    LineShape,
 ]
 
 
@@ -302,6 +332,9 @@ def parse_shape_from_data(data: ShapeData) -> Shape:
         return GroupShape.from_data(data)
     elif type == "sticky":
         return StickyShape.from_data(data)
+    elif type == "line":
+        # data.
+        return LineShape.from_data(data)
     else:
         raise Exception(f"Unknown shape type: {type}")
 

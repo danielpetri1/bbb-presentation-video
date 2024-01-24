@@ -4,7 +4,9 @@
 # SPDX-License-Identifier: MIT
 
 from math import atan2, cos, hypot, sin
-from typing import List, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple
+
+from bbb_presentation_video.events.helpers import Position
 
 S = Sequence[float]
 V = Tuple[float, float]
@@ -53,7 +55,6 @@ def uni(a: S) -> V:
 def dist(a: S, b: S) -> float:
     """Dist length from a to b."""
     return hypot(a[1] - b[1], a[0] - b[0])
-
 
 def angle(A: S, B: S) -> float:
     """Angle between vector A and vector B in radians."""
