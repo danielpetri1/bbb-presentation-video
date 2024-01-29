@@ -263,48 +263,14 @@ def finalize_line(
 
     ctx.push_group()
 
-    controlPoint = shape.handles.controlPoint
-
     if shape.spline == SplineType.CUBIC:
-        dist = curved_line(ctx, id, shape)
+        curved_line(ctx, id, shape)
     elif shape.spline == SplineType.LINE:
-        dist = bent_line(ctx, id, shape)
+        bent_line(ctx, id, shape)
     else:
-        dist = straight_line(ctx, id, shape)
+        straight_line(ctx, id, shape)
 
     line_pattern = ctx.pop_group()
 
-    label = shape.label
-    if label is not None:
-        bounds = shape.size
-        offset = Position(
-            controlPoint.x - bounds.width / 2, controlPoint.y - bounds.height / 2
-        )
-        label_size, scale_adj = finalize_label(
-            ctx,
-            shape,
-            offset=offset,
-            scale=lambda ls: max(
-                0.5,
-                min(1, max(dist / (ls.width + 128), dist / (ls.height + 128))),
-            ),
-        )
-
-        # Mask the label area so the line doesn't overlap it
-        ctx.push_group_with_content(cairo.Content.ALPHA)
-        ctx.rectangle(-100, -100, bounds.width + 200, bounds.height + 200)
-        ctx.fill()
-        ctx.set_operator(cairo.Operator.DEST_OUT)
-        ctx.translate(
-            bounds.width / 2 - label_size.width / 2 + offset.x,
-            bounds.height / 2 - label_size.height / 2 + offset.y,
-        )
-        rounded_rect(ctx, label_size, 4 * scale_adj)
-        ctx.fill()
-        mask = ctx.pop_group()
-
-        ctx.set_source(line_pattern)
-        ctx.mask(mask)
-    else:
-        ctx.set_source(line_pattern)
-        ctx.paint()
+    ctx.set_source(line_pattern)
+    ctx.paint()
