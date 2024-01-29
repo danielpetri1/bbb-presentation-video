@@ -226,6 +226,10 @@ class Decoration(Enum):
     ARROW: str = "arrow"
     NONE: str = "none"
 
+class SplineType(Enum):
+    LINE: str = "line"
+    CUBIC: str = "cubic"
+    NONE: str = "none"
 
 def perimeter_of_ellipse(rx: float, ry: float) -> float:
     """Find the approximate perimeter of an ellipse."""

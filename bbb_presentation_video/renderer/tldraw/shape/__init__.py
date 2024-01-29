@@ -14,6 +14,7 @@ from bbb_presentation_video.events.tldraw import HandleData, ShapeData
 from bbb_presentation_video.renderer.tldraw.utils import (
     Decoration,
     DrawPoints,
+    SplineType,
     Style,
 )
 
@@ -215,14 +216,14 @@ class ArrowHandles:
     start: Position
     bend: Position
     end: Position
-    controlPoint: Optional[Position]
+    controlPoint: Position
 
     def __init__(
         self,
         start: Position = Position(0.0, 0.0),
         bend: Position = Position(0.5, 0.5),
         end: Position = Position(1.0, 1.0),
-        controlPoint: Position = None,
+        controlPoint: Position = Position(0.5, 0.5),
     ) -> None:
         self.start = start
         self.bend = bend
@@ -289,7 +290,8 @@ class ArrowShape(LabelledShapeProto):
 class LineShape(LabelledShapeProto):
     handles: ArrowHandles = attr.Factory(ArrowHandles)
     """Locations of the line start, end, and bend points."""
-    spline: str = "line"
+    spline: str = SplineType.NONE
+    """Whether a bent line is straight or curved."""
 
     def update_from_data(self, data: ShapeData) -> None:
         super().update_from_data(data)
@@ -298,9 +300,14 @@ class LineShape(LabelledShapeProto):
             if "handles" in data["props"]:
                 self.handles.update_from_data(data["props"]["handles"])
             if "spline" in data["props"]:
-                self.spline = data["props"]["spline"]
-
-
+                match data["props"]["spline"]:
+                    case "line":
+                        self.spline = SplineType.LINE
+                    case "cubic":
+                        self.spline = SplineType.CUBIC
+                    case _:
+                        return SplineType.NONE
+                
 Shape = Union[
     DrawShape,
     RectangleShape,
