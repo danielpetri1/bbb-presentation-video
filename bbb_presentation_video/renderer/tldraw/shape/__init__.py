@@ -228,28 +228,26 @@ class ArrowHandles:
         self.end = end
 
     def update_from_data(self, data: Dict[str, HandleData]) -> None:
+        try:
+            self.start = Position(data["start"]["point"])
+        except KeyError:
+            pass
+        try:
+            self.bend = Position(data["bend"]["point"])
+        except KeyError:
+            pass
+        try:
+            self.end = Position(data["end"]["point"])
+        except KeyError:
+            pass
 
-        if "start" in data:
-            if "point" in data["start"]:
-                self.start = Position(data["start"]["point"])
-            elif "x" in data["start"] and "y" in data["start"]:
-                self.start = Position(data["start"]["x"], data["start"]["y"])
-
-        if "bend" in data:
-            self.bend = Position(data["bend"])
-
-        if "end" in data:
-            if "point" in data["end"]:
-                self.end = Position(data["end"]["point"])
-            elif "x" in data["end"] and "y" in data["end"]:
-                self.end = Position(data["end"]["x"], data["end"]["y"])
 
 @attr.s(order=False, slots=True, auto_attribs=True, init=False)
 class LineHandles:
     start: Position
     controlPoint: Position
     end: Position
-    
+
     def __init__(
         self,
         start: Position = Position(0.0, 0.0),
@@ -311,22 +309,29 @@ class ArrowShape(LabelledShapeProto):
         if "decorations" in data:
             self.decorations.update_from_data(data["decorations"])
         if "props" in data:
-            if "bend" in data["props"]:
-                self.bend = data["props"]["bend"]
-            if "start" in data["props"]:
-                self.handles.update_from_data(data["props"])
-            if "end" in data["props"]:
-                self.handles.update_from_data(data["props"])
-            if "arrowheadStart" in data["props"]:
-                self.decorations.start = Decoration(data["props"]["arrowheadStart"])
-            if "arrowheadEnd" in data["props"]:
-                self.decorations.end = Decoration(data["props"]["arrowheadEnd"])
-            
+            props = data["props"]
+
+            if "bend" in props:
+                self.bend = props["bend"]
+            if "start" in props:
+                if "x" in props["start"] and "y" in props["start"]:
+                    self.handles.start = Position(
+                        props["start"]["x"], props["start"]["y"]
+                    )
+            if "end" in props:
+                if "x" in props["end"] and "y" in props["end"]:
+                    self.handles.end = Position(props["end"]["x"], props["end"]["y"])
+            if "arrowheadStart" in props:
+                self.decorations.start = Decoration(props["arrowheadStart"])
+            if "arrowheadEnd" in props:
+                self.decorations.end = Decoration(props["arrowheadEnd"])
+
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class LineShape(LabelledShapeProto):
     handles: LineHandles = attr.Factory(LineHandles)
     """Locations of the line start, end, and bend points."""
-    spline: str = SplineType.NONE
+    spline: SplineType = SplineType.NONE
     """Whether a bent line is straight or curved."""
 
     def update_from_data(self, data: ShapeData) -> None:
@@ -336,14 +341,16 @@ class LineShape(LabelledShapeProto):
             if "handles" in data["props"]:
                 self.handles.update_from_data(data["props"]["handles"])
             if "spline" in data["props"]:
-                match data["props"]["spline"]:
-                    case "line":
-                        self.spline = SplineType.LINE
-                    case "cubic":
-                        self.spline = SplineType.CUBIC
-                    case _:
-                        return SplineType.NONE
-                
+                spline_prop = data["props"]["spline"]
+
+                if spline_prop == "line":
+                    self.spline = SplineType.LINE
+                elif spline_prop == "cubic":
+                    self.spline = SplineType.CUBIC
+                else:
+                    self.spline = SplineType.NONE
+
+
 Shape = Union[
     DrawShape,
     RectangleShape,

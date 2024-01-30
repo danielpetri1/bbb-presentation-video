@@ -56,6 +56,7 @@ def dist(a: S, b: S) -> float:
     """Dist length from a to b."""
     return hypot(a[1] - b[1], a[0] - b[0])
 
+
 def angle(A: S, B: S) -> float:
     """Angle between vector A and vector B in radians."""
     return atan2(B[1] - A[1], B[0] - A[0])

@@ -244,7 +244,7 @@ def straight_arrow(
     return arrow_dist
 
 
-def get_midpoint(start, end, bend):
+def get_midpoint(start: Position, end: Position, bend: float) -> Position:
     mid = [(start.x + end.x) / 2, (start.y + end.y) / 2]
 
     unit_vector = vec.uni([end.x - start.x, end.y - start.y])

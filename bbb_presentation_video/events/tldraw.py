@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
-from typing import Dict, List, Optional, TypedDict
+from typing import Dict, List, Optional, TypedDict, Union
 
 from lxml import etree
 
@@ -26,11 +26,12 @@ class StyleData(TypedDict, total=False):
 
 
 class HandleData(TypedDict, total=False):
-    id: str
-    index: float
-    point: List[float]
-    canBind: bool
     bindingId: str
+    canBind: bool
+    canSnap: bool
+    id: str
+    index: Union[str, int]
+    point: List[float]
     type: str
     x: float
     y: float
@@ -38,9 +39,12 @@ class HandleData(TypedDict, total=False):
 
 class PropsData(StyleData, total=False):
     handles: Dict[str, HandleData]
+    start: HandleData
+    end: HandleData
     spline: str
     arrowheadStart: str
     arrowheadEnd: str
+    bend: float
 
 
 class ShapeData(TypedDict, total=False):
@@ -49,24 +53,29 @@ class ShapeData(TypedDict, total=False):
     decorations: Dict[str, Optional[str]]
     handles: Dict[str, HandleData]
     id: str
+    index: Union[int, str]
     isComplete: bool
+    isLocked: bool
+    isModerator: bool
     label: str
     labelPoint: List[float]
+    meta: Dict[str, str]
     name: str
+    opacity: float
     parentId: str
     point: List[float]
     points: List[List[float]]
+    props: PropsData
     radius: List[float]
     rotation: float
     size: List[float]
     style: StyleData
     text: str
     type: str
+    typeName: str
     userId: str
     x: float
     y: float
-    opacity: float
-    props: PropsData
 
 
 class AddShapeEvent(TypedDict):
