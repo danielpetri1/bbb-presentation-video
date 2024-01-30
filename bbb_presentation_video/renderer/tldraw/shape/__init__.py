@@ -216,19 +216,16 @@ class ArrowHandles:
     start: Position
     bend: Position
     end: Position
-    controlPoint: Position
 
     def __init__(
         self,
         start: Position = Position(0.0, 0.0),
         bend: Position = Position(0.5, 0.5),
         end: Position = Position(1.0, 1.0),
-        controlPoint: Position = Position(0.5, 0.5),
     ) -> None:
         self.start = start
         self.bend = bend
         self.end = end
-        self.controlPoint = controlPoint
 
     def update_from_data(self, data: Dict[str, HandleData]) -> None:
 
@@ -239,8 +236,37 @@ class ArrowHandles:
                 self.start = Position(data["start"]["x"], data["start"]["y"])
 
         if "bend" in data:
-            if "point" in data["bend"]:
-                self.bend = Position(data["bend"]["point"])
+            self.bend = Position(data["bend"])
+
+        if "end" in data:
+            if "point" in data["end"]:
+                self.end = Position(data["end"]["point"])
+            elif "x" in data["end"] and "y" in data["end"]:
+                self.end = Position(data["end"]["x"], data["end"]["y"])
+
+@attr.s(order=False, slots=True, auto_attribs=True, init=False)
+class LineHandles:
+    start: Position
+    controlPoint: Position
+    end: Position
+    
+    def __init__(
+        self,
+        start: Position = Position(0.0, 0.0),
+        end: Position = Position(1.0, 1.0),
+        controlPoint: Position = Position(0.5, 0.5),
+    ) -> None:
+        self.start = start
+        self.controlPoint = controlPoint
+        self.end = end
+
+    def update_from_data(self, data: Dict[str, HandleData]) -> None:
+
+        if "start" in data:
+            if "point" in data["start"]:
+                self.start = Position(data["start"]["point"])
+            elif "x" in data["start"] and "y" in data["start"]:
+                self.start = Position(data["start"]["x"], data["start"]["y"])
 
         if "end" in data:
             if "point" in data["end"]:
@@ -284,11 +310,21 @@ class ArrowShape(LabelledShapeProto):
             self.handles.update_from_data(data["handles"])
         if "decorations" in data:
             self.decorations.update_from_data(data["decorations"])
-
-
+        if "props" in data:
+            if "bend" in data["props"]:
+                self.bend = data["props"]["bend"]
+            if "start" in data["props"]:
+                self.handles.update_from_data(data["props"])
+            if "end" in data["props"]:
+                self.handles.update_from_data(data["props"])
+            if "arrowheadStart" in data["props"]:
+                self.decorations.start = Decoration(data["props"]["arrowheadStart"])
+            if "arrowheadEnd" in data["props"]:
+                self.decorations.end = Decoration(data["props"]["arrowheadEnd"])
+            
 @attr.s(order=False, slots=True, auto_attribs=True)
 class LineShape(LabelledShapeProto):
-    handles: ArrowHandles = attr.Factory(ArrowHandles)
+    handles: LineHandles = attr.Factory(LineHandles)
     """Locations of the line start, end, and bend points."""
     spline: str = SplineType.NONE
     """Whether a bent line is straight or curved."""

@@ -114,11 +114,15 @@ STICKY_FILLS: Dict[ColorStyle, Color] = dict(
     [
         (
             k,
-            Color.from_int(0xFFFFFF)
-            if k is ColorStyle.WHITE
-            else Color.from_int(0x3D3D3D)
-            if k is ColorStyle.BLACK
-            else color_blend(v, CANVAS, 0.45),
+            (
+                Color.from_int(0xFFFFFF)
+                if k is ColorStyle.WHITE
+                else (
+                    Color.from_int(0x3D3D3D)
+                    if k is ColorStyle.BLACK
+                    else color_blend(v, CANVAS, 0.45)
+                )
+            ),
         )
         for k, v in COLORS.items()
     ]
@@ -135,9 +139,11 @@ FILLS: Dict[ColorStyle, Color] = dict(
     [
         (
             k,
-            Color.from_int(0xFEFEFE)
-            if k is ColorStyle.WHITE
-            else color_blend(v, CANVAS, 0.82),
+            (
+                Color.from_int(0xFEFEFE)
+                if k is ColorStyle.WHITE
+                else color_blend(v, CANVAS, 0.82)
+            ),
         )
         for k, v in COLORS.items()
     ]
@@ -226,10 +232,12 @@ class Decoration(Enum):
     ARROW: str = "arrow"
     NONE: str = "none"
 
+
 class SplineType(Enum):
     LINE: str = "line"
     CUBIC: str = "cubic"
     NONE: str = "none"
+
 
 def perimeter_of_ellipse(rx: float, ry: float) -> float:
     """Find the approximate perimeter of an ellipse."""
@@ -341,7 +349,9 @@ def bezier_quad_to_cube(
     )
 
 
-def bezier_length(start: Position, control: Position, end: Position, num_segments: int = 10) -> float:
+def bezier_length(
+    start: Position, control: Position, end: Position, num_segments: int = 10
+) -> float:
     """Approximate the length of a cubic Bézier curve."""
     length = 0.0
     t_values = [i / num_segments for i in range(num_segments + 1)]

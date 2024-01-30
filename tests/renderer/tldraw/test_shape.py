@@ -1,13 +1,17 @@
 from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.events.tldraw import ShapeData
-from bbb_presentation_video.renderer.tldraw.shape import ArrowShape, DrawShape, LineShape
+from bbb_presentation_video.renderer.tldraw.shape import (
+    ArrowShape,
+    DrawShape,
+    LineShape,
+)
 from bbb_presentation_video.renderer.tldraw.utils import (
     ColorStyle,
     DashStyle,
     Decoration,
     SizeStyle,
     Style,
-    SplineType
+    SplineType,
 )
 
 
@@ -192,6 +196,7 @@ def test_arrow_from_data_no_decorations() -> None:
     assert arrow.decorations.start is None
     assert arrow.decorations.end is None
 
+
 def test_line_from_data() -> None:
     data: ShapeData = {
         "x": 1250,
@@ -204,9 +209,7 @@ def test_line_from_data() -> None:
         "parentId": "page:1",
         "index": "a3",
         "id": "shape:O2QkpQBjAPe2V8hH6Co4X",
-        "meta": {
-            "updatedBy": "w_b3rm8exhwsjf"
-        },
+        "meta": {"updatedBy": "w_b3rm8exhwsjf"},
         "type": "line",
         "props": {
             "size": "m",
@@ -218,7 +221,7 @@ def test_line_from_data() -> None:
                     "canBind": False,
                     "id": "start",
                     "type": "vertex",
-                    "index": "a1"
+                    "index": "a1",
                 },
                 "end": {
                     "x": -229,
@@ -227,7 +230,7 @@ def test_line_from_data() -> None:
                     "canBind": False,
                     "id": "end",
                     "type": "vertex",
-                    "index": "a2"
+                    "index": "a2",
                 },
                 "handle:a1V": {
                     "x": -71,
@@ -235,13 +238,13 @@ def test_line_from_data() -> None:
                     "canBind": False,
                     "id": "handle:a1V",
                     "type": "vertex",
-                    "index": "a1V"
-                    },
+                    "index": "a1V",
                 },
+            },
             "dash": "draw",
             "color": "red",
-            "spline": "cubic"
-        }
+            "spline": "cubic",
+        },
     }
     line = LineShape.from_data(data)
     assert line.style == Style(

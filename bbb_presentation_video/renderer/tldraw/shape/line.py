@@ -37,6 +37,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
+
 def freehand_line_shaft(
     ctx: cairo.Context[CairoSomeSurface],
     id: str,

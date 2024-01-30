@@ -38,6 +38,7 @@ from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rect
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_text
 from bbb_presentation_video.renderer.tldraw.shape.triangle import finalize_triangle
+from packaging.version import Version
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
@@ -72,12 +73,20 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
     shape_patterns: Dict[str, cairo.SurfacePattern]
     """Cached rendered individual shapes for current presentation/slide."""
 
-    def __init__(self, ctx: cairo.Context[CairoSomeSurface], transform: Transform):
+    bbb_version: Version
+
+    def __init__(
+        self,
+        ctx: cairo.Context[CairoSomeSurface],
+        transform: Transform,
+        bbb_version: Version,
+    ):
         self.ctx = ctx
         self.presentation_slide = {}
         self.shapes = {}
         self.shape_patterns = {}
         self.transform = transform
+        self.bbb_version = bbb_version
 
         add_fontconfig_app_font_dir()
 
@@ -241,7 +250,7 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                 elif isinstance(shape, EllipseShape):
                     finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, ArrowShape):
-                    finalize_arrow(ctx, id, shape)
+                    finalize_arrow(ctx, id, shape, self.bbb_version)
                 elif isinstance(shape, LineShape):
                     finalize_line(ctx, id, shape)
                 elif isinstance(shape, TextShape):

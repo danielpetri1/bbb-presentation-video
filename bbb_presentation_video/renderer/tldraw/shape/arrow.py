@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from math import floor, pi, tau
+from math import floor, pi, tau, hypot, acos
 from random import Random
 from typing import Callable, List, Optional, Sequence, TypeVar
 
@@ -40,6 +40,8 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     lerp_angles,
     rounded_rect,
 )
+
+from packaging.version import Version
 
 
 def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
@@ -242,8 +244,24 @@ def straight_arrow(
     return arrow_dist
 
 
+def get_midpoint(start, end, bend):
+    mid = [(start.x + end.x) / 2, (start.y + end.y) / 2]
+
+    unit_vector = vec.uni([end.x - start.x, end.y - start.y])
+
+    unit_rotated = [unit_vector[1], -unit_vector[0]]
+    bend_offset = [unit_rotated[0] * -bend, unit_rotated[1] * -bend]
+
+    middle = Position(mid[0] + bend_offset[0], mid[1] + bend_offset[1])
+
+    return middle
+
+
 def curved_arrow(
-    ctx: cairo.Context[CairoSomeSurface], id: str, shape: ArrowShape
+    ctx: cairo.Context[CairoSomeSurface],
+    id: str,
+    shape: ArrowShape,
+    bbb_version: Version,
 ) -> float:
     style = shape.style
     start = shape.handles.start
@@ -286,7 +304,10 @@ def curved_arrow(
         ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.fill()
     else:
-        curved_arrow_shaft(ctx, start, end, center, radius, arrow_bend)
+        if bbb_version >= Version("3.0"):
+            curved_arrow_shaft(ctx, start, end, center, radius, -arrow_bend)
+        else:
+            curved_arrow_shaft(ctx, start, end, center, radius, arrow_bend)
 
         ctx.set_line_width(sw)
         ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -301,10 +322,21 @@ def curved_arrow(
 
     # Arrowheads
     arrow_head_len = min(arrow_dist / 3, stroke_width * 8)
-    if deco_start is Decoration.ARROW:
-        curved_arrow_head(ctx, start, arrow_head_len, center, radius, length < 0)
-    if deco_end is Decoration.ARROW:
-        curved_arrow_head(ctx, end, arrow_head_len, center, radius, length >= 0)
+    if bbb_version < Version("3.0"):
+        if deco_start is Decoration.ARROW:
+            curved_arrow_head(ctx, start, arrow_head_len, center, radius, length < 0)
+        if deco_end is Decoration.ARROW:
+            curved_arrow_head(ctx, end, arrow_head_len, center, radius, length >= 0)
+    else:
+        sweepFlag = (
+            (end.x - start.x) * (bend.y - start.y)
+            - (bend.x - start.x) * (end.y - start.y)
+        ) < 0
+
+        if deco_start is Decoration.ARROW:
+            curved_arrow_head(ctx, start, arrow_head_len, center, radius, sweepFlag)
+        if deco_end is Decoration.ARROW:
+            curved_arrow_head(ctx, end, arrow_head_len, center, radius, sweepFlag)
 
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -316,7 +348,10 @@ def curved_arrow(
 
 
 def finalize_arrow(
-    ctx: cairo.Context[CairoSomeSurface], id: str, shape: ArrowShape
+    ctx: cairo.Context[CairoSomeSurface],
+    id: str,
+    shape: ArrowShape,
+    bbb_version: Version,
 ) -> None:
     print(f"\tTldraw: Finalizing Arrow: {id}")
 
@@ -325,13 +360,18 @@ def finalize_arrow(
     start = shape.handles.start
     bend = shape.handles.bend
     end = shape.handles.end
-    is_straight_line = vec.dist(bend, vec.to_fixed(vec.med(start, end))) < 1
+
+    if bbb_version >= Version("3.0"):
+        is_straight_line = shape.bend == 0.0
+        shape.handles.bend = get_midpoint(start, end, shape.bend)
+    else:
+        is_straight_line = vec.dist(bend, vec.to_fixed(vec.med(start, end))) < 1
 
     ctx.push_group()
     if is_straight_line:
         dist = straight_arrow(ctx, id, shape)
     else:
-        dist = curved_arrow(ctx, id, shape)
+        dist = curved_arrow(ctx, id, shape, bbb_version)
     arrow_pattern = ctx.pop_group()
 
     label = shape.label
