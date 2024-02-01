@@ -18,11 +18,13 @@ from bbb_presentation_video.renderer.presentation import (
 from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font_dir
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
+    ArrowShape_v2,
     DrawShape,
     EllipseShape,
     GroupShape,
     HighlighterShape,
     LineShape,
+    RectangleGeo,
     RectangleShape,
     Shape,
     StickyShape,
@@ -32,11 +34,13 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     shape_sort_key,
 )
 from bbb_presentation_video.renderer.tldraw.shape.arrow import finalize_arrow
+from bbb_presentation_video.renderer.tldraw.shape.arrow_v2 import finalize_arrow_v2
 from bbb_presentation_video.renderer.tldraw.shape.draw import finalize_draw
 from bbb_presentation_video.renderer.tldraw.shape.ellipse import finalize_ellipse
 from bbb_presentation_video.renderer.tldraw.shape.highlighter import finalize_highlight
 from bbb_presentation_video.renderer.tldraw.shape.line import finalize_line
 from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rectangle
+from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_text
 from bbb_presentation_video.renderer.tldraw.shape.triangle import finalize_triangle
@@ -159,7 +163,7 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
             action = "updated"
         else:
             if "type" in data:
-                shape = parse_shape_from_data(data)
+                shape = parse_shape_from_data(data, self.bbb_version)
                 self.shapes[presentation][slide][id] = shape
                 action = "added"
             else:
@@ -247,12 +251,16 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_draw(ctx, id, shape)
                 elif isinstance(shape, RectangleShape):
                     finalize_rectangle(ctx, id, shape)
+                elif isinstance(shape, RectangleGeo):
+                    finalize_geo_rectangle(ctx, id, shape)
                 elif isinstance(shape, TriangleShape):
                     finalize_triangle(ctx, id, shape)
                 elif isinstance(shape, EllipseShape):
                     finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, ArrowShape):
-                    finalize_arrow(ctx, id, shape, self.bbb_version)
+                    finalize_arrow(ctx, id, shape)
+                elif isinstance(shape, ArrowShape_v2):
+                    finalize_arrow_v2(ctx, id, shape)
                 elif isinstance(shape, LineShape):
                     finalize_line(ctx, id, shape)
                 elif isinstance(shape, TextShape):

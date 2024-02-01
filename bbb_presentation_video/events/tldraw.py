@@ -38,15 +38,16 @@ class HandleData(TypedDict, total=False):
 
 
 class PropsData(StyleData, total=False):
-    handles: Dict[str, HandleData]
-    start: HandleData
-    end: HandleData
-    spline: str
-    arrowheadStart: str
     arrowheadEnd: str
+    arrowheadStart: str
     bend: float
-    text: str
+    end: HandleData
+    geo: str
+    handles: Dict[str, HandleData]
     isPen: bool
+    spline: str
+    start: HandleData
+    text: str
 
 
 class ShapeData(TypedDict, total=False):

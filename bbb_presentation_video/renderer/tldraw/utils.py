@@ -495,3 +495,8 @@ def pattern_fill(fill: Color) -> cairo.SurfacePattern:
     pattern.set_extend(cairo.EXTEND_REPEAT)
 
     return pattern
+
+
+def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
+    sweep = get_sweep(C, A, B)
+    return r * tau * (sweep / tau)

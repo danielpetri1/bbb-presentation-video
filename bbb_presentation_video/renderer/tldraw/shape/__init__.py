@@ -18,6 +18,8 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     Style,
 )
 
+from packaging.version import Version
+
 BaseShapeSelf = TypeVar("BaseShapeSelf", bound="BaseShapeProto")
 
 
@@ -193,6 +195,12 @@ class RectangleShape(LabelledShapeProto):
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
+class RectangleGeo(LabelledShapeProto):
+    # SizedShapeProto
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
 class EllipseShape(LabelledShapeProto):
     radius: Tuple[float, float] = (1.0, 1.0)
     """x and y radius of the ellipse."""
@@ -341,6 +349,19 @@ class ArrowShape(LabelledShapeProto):
             self.handles.update_from_data(data["handles"])
         if "decorations" in data:
             self.decorations.update_from_data(data["decorations"])
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class ArrowShape_v2(LabelledShapeProto):
+    bend: float = 0.0
+    handles: ArrowHandles = attr.Factory(ArrowHandles)
+    """Locations of the line start, end, and bend points."""
+    decorations: ArrowDecorations = attr.Factory(ArrowDecorations)
+    """Whether the arrow head decorations are present on start/end of the line."""
+
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
         if "props" in data:
             props = data["props"]
 
@@ -385,11 +406,13 @@ class LineShape(LabelledShapeProto):
 
 
 Shape = Union[
+    ArrowShape,
+    ArrowShape_v2,
     DrawShape,
     RectangleShape,
+    RectangleGeo,
     EllipseShape,
     TriangleShape,
-    ArrowShape,
     TextShape,
     GroupShape,
     StickyShape,
@@ -398,8 +421,10 @@ Shape = Union[
 ]
 
 
-def parse_shape_from_data(data: ShapeData) -> Shape:
+def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
     type = data["type"]
+    is_tldraw_v2 = bbb_version >= Version("3.0.0")
+
     if type == "draw":
         return DrawShape.from_data(data)
     elif type == "rectangle":
@@ -409,7 +434,10 @@ def parse_shape_from_data(data: ShapeData) -> Shape:
     elif type == "triangle":
         return TriangleShape.from_data(data)
     elif type == "arrow":
-        return ArrowShape.from_data(data)
+        if not is_tldraw_v2:
+            return ArrowShape.from_data(data)
+        else:
+            return ArrowShape_v2.from_data(data)
     elif type == "text":
         return TextShape.from_data(data)
     elif type == "group":
@@ -420,6 +448,13 @@ def parse_shape_from_data(data: ShapeData) -> Shape:
         return LineShape.from_data(data)
     elif type == "highlight":
         return HighlighterShape.from_data(data)
+    # elif type == "geo":
+    # geo_type = data["props"]["geo"]
+
+    # if geo_type == "rectangle":
+    #     return RectangleGeo.from_data(data)
+
+    # return RectangleGeo.from_data(data)
     else:
         raise Exception(f"Unknown shape type: {type}")
 

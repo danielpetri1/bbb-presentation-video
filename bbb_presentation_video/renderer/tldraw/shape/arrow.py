@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
+
 from math import floor, pi, tau
 from random import Random
 from typing import Callable, List, Optional, Sequence, TypeVar
@@ -10,7 +11,7 @@ from typing import Callable, List, Optional, Sequence, TypeVar
 import cairo
 from perfect_freehand import get_stroke
 
-from bbb_presentation_video.events.helpers import Position, Size
+from bbb_presentation_video.events.helpers import Position
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.easings import (
     ease_in_out_cubic,
@@ -35,18 +36,10 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     circle_from_three_points,
     draw_smooth_path,
     get_perfect_dash_props,
-    get_sweep,
     lerp_angles,
     rounded_rect,
+    get_arc_length,
 )
-
-from packaging.version import Version
-
-
-def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
-    sweep = get_sweep(C, A, B)
-    return r * tau * (sweep / tau)
-
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
@@ -192,7 +185,7 @@ def straight_arrow(
     end = shape.handles.end
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
-    opacity = shape.opacity
+
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
         return arrow_dist
@@ -206,7 +199,7 @@ def straight_arrow(
     if style.dash is DashStyle.DRAW:
         freehand_arrow_shaft(ctx, id, style, start, end, deco_start, deco_end)
 
-        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.fill_preserve()
         ctx.set_line_width(sw / 2)
         ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -223,7 +216,7 @@ def straight_arrow(
             arrow_dist, stroke_width * 1.618, style.dash, snap=2, outset=False
         )
         ctx.set_dash(dash_array, dash_offset)
-        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.stroke()
     ctx.restore()
 
@@ -237,30 +230,14 @@ def straight_arrow(
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
     ctx.stroke()
 
     return arrow_dist
 
 
-def get_midpoint(start: Position, end: Position, bend: float) -> Position:
-    mid = [(start.x + end.x) / 2, (start.y + end.y) / 2]
-
-    unit_vector = vec.uni([end.x - start.x, end.y - start.y])
-
-    unit_rotated = [unit_vector[1], -unit_vector[0]]
-    bend_offset = [unit_rotated[0] * -bend, unit_rotated[1] * -bend]
-
-    middle = Position(mid[0] + bend_offset[0], mid[1] + bend_offset[1])
-
-    return middle
-
-
 def curved_arrow(
-    ctx: cairo.Context[CairoSomeSurface],
-    id: str,
-    shape: ArrowShape,
-    bbb_version: Version,
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: ArrowShape
 ) -> float:
     style = shape.style
     start = shape.handles.start
@@ -269,8 +246,6 @@ def curved_arrow(
     arrow_bend = shape.bend
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
-    opacity = shape.opacity
-    is_tldraw_v2 = bbb_version >= Version("3.0")
 
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
@@ -287,7 +262,7 @@ def curved_arrow(
     stroke = STROKES[style.color]
 
     ctx.save()
-    if style.dash is DashStyle.DRAW and not is_tldraw_v2:
+    if style.dash is DashStyle.DRAW:
         curved_freehand_arrow_shaft(
             ctx,
             id,
@@ -305,9 +280,6 @@ def curved_arrow(
         ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.fill()
     else:
-        if is_tldraw_v2:
-            arrow_bend = -arrow_bend
-
         curved_arrow_shaft(ctx, start, end, center, radius, arrow_bend)
 
         ctx.set_line_width(sw)
@@ -317,42 +289,28 @@ def curved_arrow(
             abs(length), sw, style.dash, snap=2, outset=False
         )
         ctx.set_dash(dash_array, dash_offset)
-        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.stroke()
     ctx.restore()
 
     # Arrowheads
     arrow_head_len = min(arrow_dist / 3, stroke_width * 8)
-    if not is_tldraw_v2:
-        if deco_start is Decoration.ARROW:
-            curved_arrow_head(ctx, start, arrow_head_len, center, radius, length < 0)
-        if deco_end is Decoration.ARROW:
-            curved_arrow_head(ctx, end, arrow_head_len, center, radius, length >= 0)
-    else:
-        sweepFlag = (
-            (end.x - start.x) * (bend.y - start.y)
-            - (bend.x - start.x) * (end.y - start.y)
-        ) < 0
-
-        if deco_start is Decoration.ARROW:
-            curved_arrow_head(ctx, start, arrow_head_len, center, radius, sweepFlag)
-        if deco_end is Decoration.ARROW:
-            curved_arrow_head(ctx, end, arrow_head_len, center, radius, sweepFlag)
+    if deco_start is Decoration.ARROW:
+        curved_arrow_head(ctx, start, arrow_head_len, center, radius, length < 0)
+    if deco_end is Decoration.ARROW:
+        curved_arrow_head(ctx, end, arrow_head_len, center, radius, length >= 0)
 
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
     ctx.stroke()
 
     return abs(length)
 
 
 def finalize_arrow(
-    ctx: cairo.Context[CairoSomeSurface],
-    id: str,
-    shape: ArrowShape,
-    bbb_version: Version,
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: ArrowShape
 ) -> None:
     print(f"\tTldraw: Finalizing Arrow: {id}")
 
@@ -361,18 +319,13 @@ def finalize_arrow(
     start = shape.handles.start
     bend = shape.handles.bend
     end = shape.handles.end
-
-    if bbb_version >= Version("3.0"):
-        is_straight_line = shape.bend == 0.0
-        shape.handles.bend = get_midpoint(start, end, shape.bend)
-    else:
-        is_straight_line = vec.dist(bend, vec.to_fixed(vec.med(start, end))) < 1
+    is_straight_line = vec.dist(bend, vec.to_fixed(vec.med(start, end))) < 1
 
     ctx.push_group()
     if is_straight_line:
         dist = straight_arrow(ctx, id, shape)
     else:
-        dist = curved_arrow(ctx, id, shape, bbb_version)
+        dist = curved_arrow(ctx, id, shape)
     arrow_pattern = ctx.pop_group()
 
     label = shape.label
