@@ -108,6 +108,8 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
             self.label = data["label"] if data["label"] != "" else None
         if "labelPoint" in data:
             self.labelPoint = Position(data["labelPoint"])
+        if "props" in data and "text" in data["props"]:
+            self.label = data["props"]["text"]
 
 
 def shape_sort_key(shape: BaseShapeProto) -> float:
@@ -383,7 +385,6 @@ def parse_shape_from_data(data: ShapeData) -> Shape:
     elif type == "sticky":
         return StickyShape.from_data(data)
     elif type == "line":
-        # data.
         return LineShape.from_data(data)
     else:
         raise Exception(f"Unknown shape type: {type}")

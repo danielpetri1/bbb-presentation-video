@@ -45,6 +45,7 @@ class PropsData(StyleData, total=False):
     arrowheadStart: str
     arrowheadEnd: str
     bend: float
+    text: str
 
 
 class ShapeData(TypedDict, total=False):

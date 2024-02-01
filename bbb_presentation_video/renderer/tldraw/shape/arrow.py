@@ -3,15 +3,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
-
-from math import floor, pi, tau, hypot, acos
+from math import floor, pi, tau
 from random import Random
 from typing import Callable, List, Optional, Sequence, TypeVar
 
 import cairo
 from perfect_freehand import get_stroke
 
-from bbb_presentation_video.events.helpers import Position
+from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.easings import (
     ease_in_out_cubic,
@@ -193,7 +192,7 @@ def straight_arrow(
     end = shape.handles.end
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
-
+    opacity = shape.opacity
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
         return arrow_dist
@@ -207,7 +206,7 @@ def straight_arrow(
     if style.dash is DashStyle.DRAW:
         freehand_arrow_shaft(ctx, id, style, start, end, deco_start, deco_end)
 
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
         ctx.fill_preserve()
         ctx.set_line_width(sw / 2)
         ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -224,7 +223,7 @@ def straight_arrow(
             arrow_dist, stroke_width * 1.618, style.dash, snap=2, outset=False
         )
         ctx.set_dash(dash_array, dash_offset)
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
         ctx.stroke()
     ctx.restore()
 
@@ -238,7 +237,7 @@ def straight_arrow(
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
     ctx.stroke()
 
     return arrow_dist
@@ -270,6 +269,8 @@ def curved_arrow(
     arrow_bend = shape.bend
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
+    opacity = shape.opacity
+    is_tldraw_v2 = bbb_version >= Version("3.0")
 
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
@@ -286,7 +287,7 @@ def curved_arrow(
     stroke = STROKES[style.color]
 
     ctx.save()
-    if style.dash is DashStyle.DRAW:
+    if style.dash is DashStyle.DRAW and not is_tldraw_v2:
         curved_freehand_arrow_shaft(
             ctx,
             id,
@@ -304,10 +305,10 @@ def curved_arrow(
         ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
         ctx.fill()
     else:
-        if bbb_version >= Version("3.0"):
-            curved_arrow_shaft(ctx, start, end, center, radius, -arrow_bend)
-        else:
-            curved_arrow_shaft(ctx, start, end, center, radius, arrow_bend)
+        if is_tldraw_v2:
+            arrow_bend = -arrow_bend
+
+        curved_arrow_shaft(ctx, start, end, center, radius, arrow_bend)
 
         ctx.set_line_width(sw)
         ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -316,13 +317,13 @@ def curved_arrow(
             abs(length), sw, style.dash, snap=2, outset=False
         )
         ctx.set_dash(dash_array, dash_offset)
-        ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+        ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
         ctx.stroke()
     ctx.restore()
 
     # Arrowheads
     arrow_head_len = min(arrow_dist / 3, stroke_width * 8)
-    if bbb_version < Version("3.0"):
+    if not is_tldraw_v2:
         if deco_start is Decoration.ARROW:
             curved_arrow_head(ctx, start, arrow_head_len, center, radius, length < 0)
         if deco_end is Decoration.ARROW:
@@ -341,7 +342,7 @@ def curved_arrow(
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
     ctx.stroke()
 
     return abs(length)

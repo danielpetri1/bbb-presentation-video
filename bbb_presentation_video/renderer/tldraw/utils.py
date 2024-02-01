@@ -230,12 +230,18 @@ class Style:
 
 class Decoration(Enum):
     ARROW: str = "arrow"
+    BAR: str = "bar"
+    DIAMOND: str = "diamond"
+    DOT: str = "dot"
+    INVERTED: str = "inverted"
     NONE: str = "none"
+    SQUARE: str = "square"
+    TRIANGLE: str = "triangle"
 
 
 class SplineType(Enum):
-    LINE: str = "line"
     CUBIC: str = "cubic"
+    LINE: str = "line"
     NONE: str = "none"
 
 
