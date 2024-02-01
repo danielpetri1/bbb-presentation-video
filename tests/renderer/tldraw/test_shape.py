@@ -3,9 +3,11 @@ from bbb_presentation_video.events.tldraw import ShapeData
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     DrawShape,
+    HighlighterShape,
     LineShape,
 )
 from bbb_presentation_video.renderer.tldraw.utils import (
+    HIGHLIGHT_COLORS,
     ColorStyle,
     DashStyle,
     Decoration,
@@ -263,3 +265,33 @@ def test_line_from_data() -> None:
     assert line.handles.start == Position(0, 0)
     assert line.handles.controlPoint == Position(-71, 216)
     assert line.handles.end == Position(-229, 377)
+
+
+def test_highlight_from_data() -> None:
+    data: ShapeData = {
+        "x": 354,
+        "isLocked": False,
+        "y": 140,
+        "rotation": 0,
+        "typeName": "shape",
+        "isModerator": True,
+        "opacity": 1,
+        "parentId": "page:1",
+        "index": "a1",
+        "id": "shape:S_7PT3QSaUT6dzHcRV8Eb",
+        "meta": {"createdBy": "w_vxjirycsy2br"},
+        "type": "highlight",
+        "props": {
+            "size": "xl",
+            "color": "red",
+            "isPen": False,
+            "segments": [{"type": "free", "points": [{"x": 0, "y": 0, "z": 0.5}]}],
+            "isComplete": False,
+        },
+    }
+
+    highlight = HighlighterShape.from_data(data)
+    assert highlight.style == Style(size=SizeStyle.XL, color=ColorStyle.RED)
+
+    assert highlight.point == Position(354, 140)
+    assert highlight.rotation == 0

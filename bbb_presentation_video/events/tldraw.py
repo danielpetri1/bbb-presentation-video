@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 import json
-from typing import Dict, List, Optional, TypedDict, Union
+from typing import Collection, Dict, List, Optional, Sequence, TypedDict, Union
 
 from lxml import etree
 
@@ -22,7 +22,7 @@ class StyleData(TypedDict, total=False):
     color: str
     size: str
     isClosed: bool
-    segments: List[List[float]]
+    segments: List[Dict[str, Sequence[Collection[str]]]]
 
 
 class HandleData(TypedDict, total=False):
@@ -46,6 +46,7 @@ class PropsData(StyleData, total=False):
     arrowheadEnd: str
     bend: float
     text: str
+    isPen: bool
 
 
 class ShapeData(TypedDict, total=False):
