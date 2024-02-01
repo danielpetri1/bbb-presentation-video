@@ -21,6 +21,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     DrawShape,
     EllipseShape,
     GroupShape,
+    HighlighterShape,
     LineShape,
     RectangleShape,
     Shape,
@@ -33,6 +34,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
 from bbb_presentation_video.renderer.tldraw.shape.arrow import finalize_arrow
 from bbb_presentation_video.renderer.tldraw.shape.draw import finalize_draw
 from bbb_presentation_video.renderer.tldraw.shape.ellipse import finalize_ellipse
+from bbb_presentation_video.renderer.tldraw.shape.highlighter import finalize_highlight
 from bbb_presentation_video.renderer.tldraw.shape.line import finalize_line
 from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rectangle
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
@@ -257,6 +259,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_text(ctx, id, shape)
                 elif isinstance(shape, StickyShape):
                     finalize_sticky(ctx, shape)
+                elif isinstance(shape, HighlighterShape):
+                    finalize_highlight(ctx, id, shape)
                 elif isinstance(shape, GroupShape):
                     # Nothing to do? All group-related updates seem to be propagated to the
                     # individual shapes in the group.

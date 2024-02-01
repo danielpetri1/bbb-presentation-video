@@ -156,6 +156,37 @@ class DrawShape(RotatableShapeProto):
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
+class HighlighterShape(RotatableShapeProto):
+    points: DrawPoints = []
+    """List of input points from the drawing tool."""
+    isComplete: bool = False
+    """Whether the last point in the line is present (pen lifted)."""
+
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
+        if "props" in data and "segments" in data["props"]:
+            self.points = []
+            for segment in data["props"]["segments"]:
+                if (
+                    isinstance(segment, dict)
+                    and "points" in segment
+                    and isinstance(segment["points"], list)
+                ):
+                    for point in segment["points"]:
+                        if isinstance(point, dict) and "x" in point and "y" in point:
+                            if "z" in point:
+                                self.points.append((point["x"], point["y"], point["z"]))
+                            else:
+                                self.points.append((point["x"], point["y"]))
+
+        if "isComplete" in data:
+            self.isComplete = data["isComplete"]
+        elif "props" in data and "isComplete" in data["props"]:
+            self.isComplete = data["props"]["isComplete"]
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
 class RectangleShape(LabelledShapeProto):
     # SizedShapeProto
     size: Size = Size(1.0, 1.0)
@@ -363,6 +394,7 @@ Shape = Union[
     GroupShape,
     StickyShape,
     LineShape,
+    HighlighterShape,
 ]
 
 
@@ -386,6 +418,8 @@ def parse_shape_from_data(data: ShapeData) -> Shape:
         return StickyShape.from_data(data)
     elif type == "line":
         return LineShape.from_data(data)
+    elif type == "highlight":
+        return HighlighterShape.from_data(data)
     else:
         raise Exception(f"Unknown shape type: {type}")
 
