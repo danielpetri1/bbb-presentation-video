@@ -21,10 +21,14 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     FILLS,
     STROKE_WIDTHS,
     STROKES,
+    COLORS,
+    ColorStyle,
     DashStyle,
+    FillStyle,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
     get_perfect_dash_props,
+    pattern_fill,
 )
 
 
@@ -115,7 +119,16 @@ def draw_rectangle(
     if is_filled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
 
-        ctx.set_source_rgb(fill.r, fill.g, fill.b)
+        if style.fill is FillStyle.SEMI:
+            fill = COLORS[ColorStyle.SEMI]
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
+        elif style.fill is FillStyle.PATTERN:
+            fill = FILLS[style.color]
+            pattern = pattern_fill(fill)
+            ctx.set_source(pattern)
+        else:
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
+
         ctx.fill()
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
@@ -128,7 +141,7 @@ def draw_rectangle(
     )
     draw_smooth_path(ctx, stroke_outline_points, closed=True)
 
-    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
     ctx.fill_preserve()
     ctx.set_line_width(stroke_width)
     ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -152,7 +165,17 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
         ctx.line_to(w, h)
         ctx.line_to(sw / 2, h)
         ctx.close_path()
-        ctx.set_source_rgb(fill.r, fill.g, fill.b)
+
+        if style.fill is FillStyle.SEMI:
+            fill = COLORS[ColorStyle.SEMI]
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
+        elif style.fill is FillStyle.PATTERN:
+            fill = FILLS[style.color]
+            pattern = pattern_fill(fill)
+            ctx.set_source(pattern)
+        else:
+            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
+            
         ctx.fill()
 
     strokes = [
@@ -164,7 +187,7 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
     for start, end, length in strokes:
         dash_array, dash_offset = get_perfect_dash_props(
             length, stroke_width * 1.618, style.dash

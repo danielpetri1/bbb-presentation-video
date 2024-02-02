@@ -12,6 +12,7 @@ import cairo
 from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.events.tldraw import HandleData, ShapeData
 from bbb_presentation_video.renderer.tldraw.utils import (
+    AlignStyle,
     Decoration,
     DrawPoints,
     SplineType,
@@ -96,6 +97,12 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
     labelPoint: Position = Position(0.5, 0.5)
     """The position of the label within the shape. Ranges from 0 to 1."""
 
+    align: AlignStyle = AlignStyle.MIDDLE
+    """Horizontal alignment of the label."""
+
+    verticalAlign: AlignStyle = AlignStyle.MIDDLE
+    """Vertical alignment of the label."""
+
     def label_offset(self) -> Position:
         """Calculate the offset needed when drawing the label for most shapes."""
         return Position(
@@ -110,8 +117,15 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
             self.label = data["label"] if data["label"] != "" else None
         if "labelPoint" in data:
             self.labelPoint = Position(data["labelPoint"])
-        if "props" in data and "text" in data["props"]:
-            self.label = data["props"]["text"]
+        if "props" in data:
+            props = data["props"]
+            
+            if "text" in props:
+                self.label = props["text"]
+            if "align" in props:
+                self.align = AlignStyle(props["align"])
+            if "verticalAlign" in props:
+                self.verticalAlign = AlignStyle(props["verticalAlign"])
 
 
 def shape_sort_key(shape: BaseShapeProto) -> float:
@@ -199,6 +213,17 @@ class RectangleGeo(LabelledShapeProto):
     # SizedShapeProto
     size: Size = Size(1.0, 1.0)
 
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
+        if "props" in data:
+            props = data["props"]
+            if "w" in props:
+                self.size.width = data["props"]["w"]
+            if "h" in props:
+                self.size.height = data["props"]["h"]
+            if "growY" in props:
+                self.size.height += data["props"]["growY"]
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class EllipseShape(LabelledShapeProto):
@@ -448,13 +473,14 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         return LineShape.from_data(data)
     elif type == "highlight":
         return HighlighterShape.from_data(data)
-    # elif type == "geo":
-    # geo_type = data["props"]["geo"]
+    elif type == "geo":
+        if "geo" in data["props"]:
+            geo_type = data["props"]["geo"]
 
-    # if geo_type == "rectangle":
-    #     return RectangleGeo.from_data(data)
+            if geo_type == "rectangle":
+                return RectangleGeo.from_data(data)
 
-    # return RectangleGeo.from_data(data)
+        raise Exception(f"Unknown geo shape: {type}")
     else:
         raise Exception(f"Unknown shape type: {type}")
 

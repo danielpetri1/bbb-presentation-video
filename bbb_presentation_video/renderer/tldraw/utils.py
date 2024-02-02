@@ -242,6 +242,9 @@ class Style:
             self.isClosed = data["isClosed"]
         if "fill" in data:
             self.fill = FillStyle(data["fill"])
+            if self.fill is not FillStyle.NONE:
+                self.isFilled = True
+
 
 
 class Decoration(Enum):

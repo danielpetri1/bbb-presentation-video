@@ -9,7 +9,6 @@ from lxml import etree
 
 from bbb_presentation_video.events.helpers import Position, xml_subelement
 
-
 class StyleData(TypedDict, total=False):
     dash: str
     font: str
@@ -38,6 +37,7 @@ class HandleData(TypedDict, total=False):
 
 
 class PropsData(StyleData, total=False):
+    align: str
     arrowheadEnd: str
     arrowheadStart: str
     bend: float
@@ -48,6 +48,10 @@ class PropsData(StyleData, total=False):
     spline: str
     start: HandleData
     text: str
+    verticalAlign: str
+    w: float
+    h: float
+    growY: float
 
 
 class ShapeData(TypedDict, total=False):
