@@ -502,3 +502,22 @@ def pattern_fill(fill: Color) -> cairo.SurfacePattern:
 def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
     sweep = get_sweep(C, A, B)
     return r * tau * (sweep / tau)
+
+
+def apply_geo_fill(
+    ctx: cairo.Context[CairoSomeSurface], style: Style, opacity: float
+) -> None:
+    fill = FILLS[style.color]
+
+    if style.fill is FillStyle.SEMI:
+        fill = COLORS[ColorStyle.SEMI]
+        ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
+
+    elif style.fill is FillStyle.PATTERN:
+        fill = FILLS[style.color]
+        pattern = pattern_fill(fill)
+        ctx.set_source(pattern)
+    else:
+        ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
+
+    ctx.fill()

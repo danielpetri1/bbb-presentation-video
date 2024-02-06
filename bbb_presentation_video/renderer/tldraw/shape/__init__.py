@@ -55,6 +55,7 @@ class BaseShapeProto(Protocol):
         if "point" in data:
             point = data["point"]
             self.point = Position(point[0], point[1])
+
         elif "x" in data and "y" in data:
             self.point = Position(data["x"], data["y"])
 
@@ -126,6 +127,12 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
                 self.align = AlignStyle(props["align"])
             if "verticalAlign" in props:
                 self.verticalAlign = AlignStyle(props["verticalAlign"])
+            if "w" in props:
+                self.size.width = props["w"]
+            if "h" in props:
+                self.size.height = props["h"]
+            if "growY" in props:
+                self.size.height += props["growY"]
 
 
 def shape_sort_key(shape: BaseShapeProto) -> float:
@@ -210,20 +217,7 @@ class RectangleShape(LabelledShapeProto):
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class RectangleGeo(LabelledShapeProto):
-    # SizedShapeProto
     size: Size = Size(1.0, 1.0)
-
-    def update_from_data(self, data: ShapeData) -> None:
-        super().update_from_data(data)
-
-        if "props" in data:
-            props = data["props"]
-            if "w" in props:
-                self.size.width = data["props"]["w"]
-            if "h" in props:
-                self.size.height = data["props"]["h"]
-            if "growY" in props:
-                self.size.height += data["props"]["growY"]
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
@@ -240,6 +234,11 @@ class EllipseShape(LabelledShapeProto):
         if "radius" in data:
             radius = data["radius"]
             self.radius = (radius[0], radius[1])
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class EllipseGeo(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
@@ -480,6 +479,8 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
 
             if geo_type == "rectangle":
                 return RectangleGeo.from_data(data)
+            if geo_type == "ellipse":
+                return EllipseGeo.from_data(data)
 
         raise Exception(f"Unknown geo shape: {type}")
     else:
@@ -497,12 +498,3 @@ def apply_shape_rotation(
     ctx.translate(x, y)
     ctx.rotate(shape.rotation)
     ctx.translate(-x, -y)
-
-
-def apply_shape_rotation_v2(
-    ctx: cairo.Context[CairoSomeSurface], shape: RotatableShapeProto
-) -> None:
-    x = shape.size.width / 2
-    y = shape.size.height / 2
-    ctx.translate(x, y)
-    ctx.rotate(shape.rotation)

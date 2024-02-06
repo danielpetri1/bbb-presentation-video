@@ -14,21 +14,16 @@ import perfect_freehand
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
     RectangleGeo,
-    apply_shape_rotation_v2,
 )
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
-    FILLS,
     STROKE_WIDTHS,
     STROKES,
-    COLORS,
-    ColorStyle,
     DashStyle,
-    FillStyle,
+    apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
     get_perfect_dash_props,
-    pattern_fill,
 )
 
 
@@ -112,24 +107,12 @@ def draw_rectangle(
     is_filled = style.isFilled
     stroke = STROKES[style.color]
     stroke_width = STROKE_WIDTHS[style.size]
-    fill = FILLS[style.color]
 
     stroke_points = rectangle_stroke_points(id, shape)
 
     if is_filled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
-
-        if style.fill is FillStyle.SEMI:
-            fill = COLORS[ColorStyle.SEMI]
-            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
-        elif style.fill is FillStyle.PATTERN:
-            fill = FILLS[style.color]
-            pattern = pattern_fill(fill)
-            ctx.set_source(pattern)
-        else:
-            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
-
-        ctx.fill()
+        apply_geo_fill(ctx, style, shape.opacity)
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
         stroke_points,
@@ -153,7 +136,6 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
     style = shape.style
     stroke = STROKES[style.color]
     stroke_width = STROKE_WIDTHS[style.size]
-    fill = FILLS[style.color]
 
     sw = 1 + stroke_width * 1.618
     w = max(0, shape.size.width - sw / 2)
@@ -165,18 +147,7 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
         ctx.line_to(w, h)
         ctx.line_to(sw / 2, h)
         ctx.close_path()
-
-        if style.fill is FillStyle.SEMI:
-            fill = COLORS[ColorStyle.SEMI]
-            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
-        elif style.fill is FillStyle.PATTERN:
-            fill = FILLS[style.color]
-            pattern = pattern_fill(fill)
-            ctx.set_source(pattern)
-        else:
-            ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
-
-        ctx.fill()
+        apply_geo_fill(ctx, style, shape.opacity)
 
     strokes = [
         ((sw / 2, sw / 2), (w, sw / 2), w - sw / 2),
@@ -203,7 +174,7 @@ def finalize_geo_rectangle(
 ) -> None:
     print(f"\tTldraw: Finalizing Rectangle (geo): {id}")
 
-    apply_shape_rotation_v2(ctx, shape)
+    ctx.rotate(shape.rotation)
 
     if shape.style.dash is DashStyle.DRAW:
         draw_rectangle(ctx, id, shape)

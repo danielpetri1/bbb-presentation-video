@@ -16,11 +16,13 @@ from bbb_presentation_video.renderer.presentation import (
     apply_shapes_transform,
 )
 from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font_dir
+from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     ArrowShape_v2,
     DrawShape,
     EllipseShape,
+    EllipseGeo,
     GroupShape,
     HighlighterShape,
     LineShape,
@@ -257,6 +259,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_triangle(ctx, id, shape)
                 elif isinstance(shape, EllipseShape):
                     finalize_ellipse(ctx, id, shape)
+                elif isinstance(shape, EllipseGeo):
+                    finalize_geo_ellipse(ctx, id, shape)
                 elif isinstance(shape, ArrowShape):
                     finalize_arrow(ctx, id, shape)
                 elif isinstance(shape, ArrowShape_v2):
