@@ -497,3 +497,12 @@ def apply_shape_rotation(
     ctx.translate(x, y)
     ctx.rotate(shape.rotation)
     ctx.translate(-x, -y)
+
+
+def apply_shape_rotation_v2(
+    ctx: cairo.Context[CairoSomeSurface], shape: RotatableShapeProto
+) -> None:
+    x = shape.size.width / 2
+    y = shape.size.height / 2
+    ctx.translate(x, y)
+    ctx.rotate(shape.rotation)
