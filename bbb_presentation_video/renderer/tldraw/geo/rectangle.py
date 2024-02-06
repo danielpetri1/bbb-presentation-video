@@ -16,7 +16,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     RectangleGeo,
     apply_shape_rotation,
 )
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_label
+from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     FILLS,
     STROKE_WIDTHS,
@@ -175,7 +175,7 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
             ctx.set_source(pattern)
         else:
             ctx.set_source_rgba(fill.r, fill.g, fill.b, shape.opacity)
-            
+
         ctx.fill()
 
     strokes = [
@@ -210,4 +210,4 @@ def finalize_geo_rectangle(
     else:
         dash_rectangle(ctx, shape)
 
-    finalize_label(ctx, shape)
+    finalize_v2_label(ctx, shape)

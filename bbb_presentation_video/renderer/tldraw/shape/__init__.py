@@ -119,7 +119,7 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
             self.labelPoint = Position(data["labelPoint"])
         if "props" in data:
             props = data["props"]
-            
+
             if "text" in props:
                 self.label = props["text"]
             if "align" in props:
@@ -224,6 +224,7 @@ class RectangleGeo(LabelledShapeProto):
                 self.size.height = data["props"]["h"]
             if "growY" in props:
                 self.size.height += data["props"]["growY"]
+
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class EllipseShape(LabelledShapeProto):

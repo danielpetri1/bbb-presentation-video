@@ -9,6 +9,7 @@ from lxml import etree
 
 from bbb_presentation_video.events.helpers import Position, xml_subelement
 
+
 class StyleData(TypedDict, total=False):
     dash: str
     font: str

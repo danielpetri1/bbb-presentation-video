@@ -167,6 +167,57 @@ def finalize_text(
     show_layout_by_lines(ctx, layout, padding=4)
 
 
+def finalize_v2_label(
+    ctx: cairo.Context[CairoSomeSurface],
+    shape: LabelledShapeProto,
+    *,
+    offset: Optional[Position] = None,
+) -> Size:
+    if shape.label is None or shape.label == "":
+        return Size(16, 32)
+
+    print(f"\t\tFinalizing Label (v2)")
+
+    style = shape.style
+    stroke = STROKES[style.color]
+    font_size = FONT_SIZES[style.size]
+
+    ctx.save()
+
+    # Create layout aligning the text horizontally within the shape
+    style.textAlign = shape.align
+    layout = create_pango_layout(
+        ctx, style, font_size, width=shape.size.width, padding=4
+    )
+    layout.set_text(shape.label, -1)
+
+    label_size = get_layout_size(layout, padding=4)
+
+    bounds = shape.size
+
+    if offset is None:
+        offset = shape.label_offset()
+
+    x = offset.x
+
+    # Align text vertically in the shape
+    if shape.verticalAlign == AlignStyle.START:
+        y = offset.y
+    elif shape.verticalAlign == AlignStyle.END:
+        y = bounds.height - label_size.height + offset.y
+    else:
+        y = bounds.height / 2 - label_size.height / 2 + offset.y
+
+    ctx.translate(x, y)
+
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    show_layout_by_lines(ctx, layout, padding=4)
+
+    ctx.restore()
+
+    return label_size
+
+
 def finalize_label(
     ctx: cairo.Context[CairoSomeSurface],
     shape: LabelledShapeProto,

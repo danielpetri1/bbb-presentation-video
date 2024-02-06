@@ -246,7 +246,6 @@ class Style:
                 self.isFilled = True
 
 
-
 class Decoration(Enum):
     ARROW: str = "arrow"
     BAR: str = "bar"
