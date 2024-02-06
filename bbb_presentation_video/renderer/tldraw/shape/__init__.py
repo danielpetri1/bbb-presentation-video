@@ -437,6 +437,7 @@ Shape = Union[
     RectangleShape,
     RectangleGeo,
     EllipseShape,
+    EllipseGeo,
     TriangleShape,
     TextShape,
     GroupShape,

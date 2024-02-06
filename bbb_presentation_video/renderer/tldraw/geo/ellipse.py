@@ -124,7 +124,7 @@ def dash_ellipse(ctx: cairo.Context[CairoSomeSurface], shape: EllipseGeo) -> Non
         apply_geo_fill(ctx, style, shape.opacity)
 
     cairo_draw_ellipse(ctx, radius[0], radius[1], radius[0], radius[1])
-    
+
     ctx.set_dash(dash_array, dash_offset)
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)

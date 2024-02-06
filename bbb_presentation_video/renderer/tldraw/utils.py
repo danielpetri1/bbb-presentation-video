@@ -47,12 +47,12 @@ STROKE_WIDTHS: Dict[SizeStyle, float] = {
 
 FONT_SIZES: Dict[SizeStyle, float] = {
     SizeStyle.SMALL: 28,
-    SizeStyle.S: 28,
+    SizeStyle.S: 26,
     SizeStyle.MEDIUM: 48,
-    SizeStyle.M: 48,
+    SizeStyle.M: 36,
     SizeStyle.LARGE: 96,
-    SizeStyle.L: 96,
-    SizeStyle.XL: 128,
+    SizeStyle.L: 54,
+    SizeStyle.XL: 64,
 }
 
 STICKY_FONT_SIZES: Dict[SizeStyle, float] = {
