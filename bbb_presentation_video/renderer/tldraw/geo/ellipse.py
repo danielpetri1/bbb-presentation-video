@@ -18,7 +18,6 @@ from bbb_presentation_video.renderer.tldraw.shape import (
 )
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
-    FILLS,
     STROKE_WIDTHS,
     STROKES,
     DashStyle,

@@ -76,6 +76,12 @@ class SizedShapeProto(BaseShapeProto, Protocol):
         if "size" in data:
             self.size = Size(data["size"])
 
+        if "props" in data:
+            props = data["props"]
+
+            if "w" in props and "h" in props and "growY" in props:
+                self.size = Size(props["w"], props["h"] + props["growY"])
+
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class RotatableShapeProto(SizedShapeProto, Protocol):
@@ -127,12 +133,6 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
                 self.align = AlignStyle(props["align"])
             if "verticalAlign" in props:
                 self.verticalAlign = AlignStyle(props["verticalAlign"])
-            if "w" in props:
-                self.size.width = props["w"]
-            if "h" in props:
-                self.size.height = props["h"]
-            if "growY" in props:
-                self.size.height += props["growY"]
 
 
 def shape_sort_key(shape: BaseShapeProto) -> float:
@@ -244,6 +244,11 @@ class EllipseGeo(LabelledShapeProto):
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TriangleShape(LabelledShapeProto):
     # SizedShapeProto
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class TriangleGeo(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
 
 
@@ -439,6 +444,7 @@ Shape = Union[
     EllipseShape,
     EllipseGeo,
     TriangleShape,
+    TriangleGeo,
     TextShape,
     GroupShape,
     StickyShape,
@@ -482,6 +488,8 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
                 return RectangleGeo.from_data(data)
             if geo_type == "ellipse":
                 return EllipseGeo.from_data(data)
+            if geo_type == "triangle":
+                return TriangleGeo.from_data(data)
 
         raise Exception(f"Unknown geo shape: {type}")
     else:

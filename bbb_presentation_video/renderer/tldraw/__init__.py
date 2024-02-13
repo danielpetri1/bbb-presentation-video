@@ -16,7 +16,9 @@ from bbb_presentation_video.renderer.presentation import (
     apply_shapes_transform,
 )
 from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font_dir
+from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
 from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
+from bbb_presentation_video.renderer.tldraw.geo.triangle import finalize_geo_triangle
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     ArrowShape_v2,
@@ -32,6 +34,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     StickyShape,
     TextShape,
     TriangleShape,
+    TriangleGeo,
     parse_shape_from_data,
     shape_sort_key,
 )
@@ -42,7 +45,6 @@ from bbb_presentation_video.renderer.tldraw.shape.ellipse import finalize_ellips
 from bbb_presentation_video.renderer.tldraw.shape.highlighter import finalize_highlight
 from bbb_presentation_video.renderer.tldraw.shape.line import finalize_line
 from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rectangle
-from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_text
 from bbb_presentation_video.renderer.tldraw.shape.triangle import finalize_triangle
@@ -257,6 +259,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_geo_rectangle(ctx, id, shape)
                 elif isinstance(shape, TriangleShape):
                     finalize_triangle(ctx, id, shape)
+                elif isinstance(shape, TriangleGeo):
+                    finalize_geo_triangle(ctx, id, shape)
                 elif isinstance(shape, EllipseShape):
                     finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, EllipseGeo):

@@ -466,7 +466,7 @@ def draw_smooth_stroke_point_path(
     draw_smooth_path(ctx, outline_points, closed)
 
 
-def pattern_fill(fill: Color) -> cairo.SurfacePattern:
+def pattern_fill(fill: Color, opacity: float = 1) -> cairo.SurfacePattern:
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 8, 8)
     ctx = cairo.Context(surface)
 
@@ -474,13 +474,13 @@ def pattern_fill(fill: Color) -> cairo.SurfacePattern:
     ctx.rectangle(0, 0, 8, 8)
 
     # Set the background to white
-    ctx.set_source_rgb(1, 1, 1)
+    ctx.set_source_rgba(1, 1, 1, opacity)
     ctx.fill_preserve()
 
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
 
     # Set the pattern fill color
-    ctx.set_source_rgb(fill.r, fill.g, fill.b)
+    ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
 
     # Draw the hash lines
     ctx.move_to(0.66, 2)
@@ -515,7 +515,7 @@ def apply_geo_fill(
 
     elif style.fill is FillStyle.PATTERN:
         fill = FILLS[style.color]
-        pattern = pattern_fill(fill)
+        pattern = pattern_fill(fill, opacity)
         ctx.set_source(pattern)
     else:
         ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)

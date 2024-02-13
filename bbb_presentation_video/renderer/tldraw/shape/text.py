@@ -25,6 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     STICKY_TEXT_COLOR,
     STROKES,
     AlignStyle,
+    ColorStyle,
     Style,
 )
 
@@ -179,7 +180,8 @@ def finalize_v2_label(
     print(f"\t\tFinalizing Label (v2)")
 
     style = shape.style
-    stroke = STROKES[style.color]
+    stroke = STROKES[ColorStyle.BLACK]  # v2 labels are always black
+    border_color = (1, 1, 1, 1)  # White
     font_size = FONT_SIZES[style.size]
 
     ctx.save()
@@ -192,7 +194,6 @@ def finalize_v2_label(
     layout.set_text(shape.label, -1)
 
     label_size = get_layout_size(layout, padding=4)
-
     bounds = shape.size
 
     if offset is None:
@@ -208,9 +209,27 @@ def finalize_v2_label(
     else:
         y = bounds.height / 2 - label_size.height / 2 + offset.y
 
-    ctx.translate(x, y)
+    border_thickness = 2
 
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    # Draw the border by offsetting the text in several directions
+    offsets = [
+        (-border_thickness, -border_thickness),
+        (border_thickness, -border_thickness),
+        (-border_thickness, border_thickness),
+        (border_thickness, border_thickness),
+    ]
+
+    for dx, dy in offsets:
+        ctx.translate(x + dx, y + dy)
+        ctx.set_source_rgba(*border_color)
+        show_layout_by_lines(ctx, layout, padding=4)
+        ctx.translate(-x - dx, -y - dy)  # Reset translation for next iteration
+
+    # Draw the original text on top
+    ctx.translate(x, y)
+    ctx.set_source_rgba(
+        stroke.r, stroke.g, stroke.b, shape.opacity
+    )  # Set original text color
     show_layout_by_lines(ctx, layout, padding=4)
 
     ctx.restore()

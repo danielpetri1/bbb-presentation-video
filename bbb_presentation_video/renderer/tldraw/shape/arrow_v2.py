@@ -18,7 +18,6 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape_v2,
     apply_shape_rotation,
 )
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,
