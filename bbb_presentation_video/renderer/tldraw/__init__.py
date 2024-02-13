@@ -16,12 +16,14 @@ from bbb_presentation_video.renderer.presentation import (
     apply_shapes_transform,
 )
 from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font_dir
+from bbb_presentation_video.renderer.tldraw.geo.diamond import finalize_diamond
 from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
 from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
 from bbb_presentation_video.renderer.tldraw.geo.triangle import finalize_geo_triangle
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     ArrowShape_v2,
+    Diamond,
     DrawShape,
     EllipseShape,
     EllipseGeo,
@@ -251,6 +253,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                 ctx.push_group()
 
                 ctx.translate(*shape.point)
+                if isinstance(shape, Diamond):
+                    finalize_diamond(ctx, id, shape)
                 if isinstance(shape, DrawShape):
                     finalize_draw(ctx, id, shape)
                 elif isinstance(shape, RectangleShape):

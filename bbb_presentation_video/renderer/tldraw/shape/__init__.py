@@ -251,6 +251,9 @@ class TriangleShape(LabelledShapeProto):
 class TriangleGeo(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
 
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Diamond(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TextShape(RotatableShapeProto):
@@ -438,6 +441,7 @@ class LineShape(LabelledShapeProto):
 Shape = Union[
     ArrowShape,
     ArrowShape_v2,
+    Diamond,
     DrawShape,
     RectangleShape,
     RectangleGeo,
@@ -484,10 +488,12 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         if "geo" in data["props"]:
             geo_type = data["props"]["geo"]
 
-            if geo_type == "rectangle":
-                return RectangleGeo.from_data(data)
+            if geo_type == "diamond":
+                return Diamond.from_data(data)
             if geo_type == "ellipse":
                 return EllipseGeo.from_data(data)
+            if geo_type == "rectangle":
+                return RectangleGeo.from_data(data)
             if geo_type == "triangle":
                 return TriangleGeo.from_data(data)
 

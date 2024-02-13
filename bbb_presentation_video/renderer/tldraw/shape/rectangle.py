@@ -68,7 +68,7 @@ def rectangle_stroke_points(
     px = max(8, floor(w / 16))
     py = max(8, floor(h / 16))
 
-    # Inset each line by the corner radii and let the freehand algo
+    # Insert each line by the corner radii and let the freehand algo
     # interpolate points for the corners.
     lines = [
         vec.points_between(vec.add(tl, (rx, 0)), vec.sub(tr, (rx, 0)), px),
