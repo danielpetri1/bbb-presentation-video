@@ -99,7 +99,7 @@ def straight_arrow(ctx: cairo.Context[CairoSomeSurface], shape: ArrowShape_v2) -
     end = shape.handles.end
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
-    opacity = shape.opacity
+    opacity = style.opacity
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
         return arrow_dist
@@ -165,7 +165,6 @@ def curved_arrow(
     arrow_bend = shape.bend
     deco_start = shape.decorations.start
     deco_end = shape.decorations.end
-    opacity = shape.opacity
 
     arrow_dist = vec.dist(start, end)
     if arrow_dist < 2:
@@ -192,7 +191,7 @@ def curved_arrow(
     )
 
     ctx.set_dash(dash_array, dash_offset)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.stroke()
     ctx.restore()
 
@@ -211,7 +210,7 @@ def curved_arrow(
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.stroke()
 
     return abs(length)

@@ -228,7 +228,7 @@ def finalize_v2_label(
     # Draw the original text on top
     ctx.translate(x, y)
     ctx.set_source_rgba(
-        stroke.r, stroke.g, stroke.b, shape.opacity
+        stroke.r, stroke.g, stroke.b, style.opacity
     )  # Set original text color
     show_layout_by_lines(ctx, layout, padding=4)
 

@@ -247,7 +247,7 @@ def curved_line(
     )
 
     ctx.set_dash(dash_array, dash_offset)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.stroke()
 
     ctx.restore()

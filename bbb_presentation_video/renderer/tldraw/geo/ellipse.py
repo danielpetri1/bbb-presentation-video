@@ -81,7 +81,7 @@ def draw_ellipse(
 
     if style.isFilled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
         stroke_points,
@@ -120,7 +120,7 @@ def dash_ellipse(ctx: cairo.Context[CairoSomeSurface], shape: EllipseGeo) -> Non
 
     if style.isFilled:
         cairo_draw_ellipse(ctx, radius[0], radius[1], radius[0], radius[1])
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     cairo_draw_ellipse(ctx, radius[0], radius[1], radius[0], radius[1])
 
@@ -128,7 +128,7 @@ def dash_ellipse(ctx: cairo.Context[CairoSomeSurface], shape: EllipseGeo) -> Non
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.stroke()
 
 

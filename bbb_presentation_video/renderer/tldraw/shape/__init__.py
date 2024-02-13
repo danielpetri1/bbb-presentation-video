@@ -46,6 +46,7 @@ class BaseShapeProto(Protocol):
     def update_from_data(self, data: ShapeData) -> None:
         if "style" in data:
             self.style.update_from_data(data["style"])
+
         elif "props" in data:
             self.style.update_from_data(data["props"])
 
@@ -60,7 +61,7 @@ class BaseShapeProto(Protocol):
             self.point = Position(data["x"], data["y"])
 
         if "opacity" in data:
-            self.opacity = data["opacity"]
+            self.style.opacity = data["opacity"]
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
@@ -256,9 +257,11 @@ class TriangleGeo(LabelledShapeProto):
 class Diamond(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
 
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class Trapezoid(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
+
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TextShape(RotatableShapeProto):
@@ -457,6 +460,7 @@ Shape = Union[
     RectangleShape,
     StickyShape,
     TextShape,
+    Trapezoid,
     TriangleGeo,
     TriangleShape,
 ]

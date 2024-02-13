@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    get_perfect_dash_props,
+    finalize_dash_geo,
 )
 
 
@@ -93,7 +93,7 @@ def draw_triangle(
 
     if style.isFilled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
         stroke_points,
@@ -105,7 +105,7 @@ def draw_triangle(
     )
     draw_smooth_path(ctx, stroke_outline_points, closed=True)
 
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.fill_preserve()
     ctx.set_line_width(stroke_width)
     ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -116,12 +116,8 @@ def draw_triangle(
 def dash_triangle(ctx: cairo.Context[CairoSomeSurface], shape: TriangleGeo) -> None:
     style = shape.style
 
-    stroke = STROKES[style.color]
-    stroke_width = STROKE_WIDTHS[style.size] * 1.618
-
-    sw = 1 + stroke_width
-    w = max(0, shape.size.width - sw / 2)
-    h = max(0, shape.size.height - sw / 2)
+    w = max(0, shape.size.width)
+    h = max(0, shape.size.height)
 
     side_width = hypot(w / 2, h)
 
@@ -130,26 +126,19 @@ def dash_triangle(ctx: cairo.Context[CairoSomeSurface], shape: TriangleGeo) -> N
         ctx.line_to(w, h)
         ctx.line_to(0, h)
         ctx.close_path()
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     strokes = [
         (Position(w / 2, 0), Position(w, h), side_width),
         (Position(w, h), Position(0, h), w),
         (Position(0, h), Position(w / 2, 0), side_width),
     ]
-    ctx.set_line_width(sw)
-    ctx.set_line_cap(cairo.LineCap.ROUND)
-    ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
 
-    for start, end, length in strokes:
-        ctx.move_to(start.x, start.y)
-        ctx.line_to(end.x, end.y)
-        dash_array, dash_offset = get_perfect_dash_props(
-            length, stroke_width, style.dash
-        )
-        ctx.set_dash(dash_array, dash_offset)
-        ctx.stroke()
+    finalize_dash_geo(
+        ctx,
+        strokes,
+        style,
+    )
 
 
 def finalize_geo_triangle(

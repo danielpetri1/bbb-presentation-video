@@ -504,20 +504,43 @@ def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
     return r * tau * (sweep / tau)
 
 
-def apply_geo_fill(
-    ctx: cairo.Context[CairoSomeSurface], style: Style, opacity: float
-) -> None:
+def apply_geo_fill(ctx: cairo.Context[CairoSomeSurface], style: Style) -> None:
     fill = FILLS[style.color]
 
     if style.fill is FillStyle.SEMI:
         fill = COLORS[ColorStyle.SEMI]
-        ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
+        ctx.set_source_rgba(fill.r, fill.g, fill.b, style.opacity)
 
     elif style.fill is FillStyle.PATTERN:
         fill = FILLS[style.color]
-        pattern = pattern_fill(fill, opacity)
+        pattern = pattern_fill(fill, style.opacity)
         ctx.set_source(pattern)
     else:
-        ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
+        ctx.set_source_rgba(fill.r, fill.g, fill.b, style.opacity)
 
     ctx.fill()
+
+
+def finalize_dash_geo(
+    ctx: cairo.Context[CairoSomeSurface],
+    strokes: List[Tuple[Position, Position, float]],
+    style: Style,
+) -> None:
+    stroke = STROKES[style.color]
+    stroke_width = STROKE_WIDTHS[style.size] * 1.618
+
+    sw = 1 + stroke_width
+
+    ctx.set_line_width(sw)
+    ctx.set_line_cap(cairo.LineCap.ROUND)
+    ctx.set_line_join(cairo.LineJoin.ROUND)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
+
+    for start, end, length in strokes:
+        ctx.move_to(start.x, start.y)
+        ctx.line_to(end.x, end.y)
+        dash_array, dash_offset = get_perfect_dash_props(
+            length, stroke_width, style.dash
+        )
+        ctx.set_dash(dash_array, dash_offset)
+        ctx.stroke()

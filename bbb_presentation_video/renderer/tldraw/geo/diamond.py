@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    get_perfect_dash_props,
+    finalize_dash_geo,
 )
 
 
@@ -98,7 +98,7 @@ def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) 
 
     if style.isFilled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
         stroke_points,
@@ -110,7 +110,7 @@ def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) 
     )
     draw_smooth_path(ctx, stroke_outline_points, closed=True)
 
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.fill_preserve()
     ctx.set_line_width(stroke_width)
     ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -121,12 +121,9 @@ def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) 
 def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
     style = shape.style
 
-    stroke = STROKES[style.color]
-    stroke_width = STROKE_WIDTHS[style.size] * 1.618
+    w = max(0, shape.size.width)
+    h = max(0, shape.size.height)
 
-    sw = 1 + stroke_width
-    w = max(0, shape.size.width - sw / 2)
-    h = max(0, shape.size.height - sw / 2)
     half_width = w / 2
     half_height = h / 2
 
@@ -136,7 +133,7 @@ def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
         ctx.line_to(half_width, h)
         ctx.line_to(0, half_height)
         ctx.close_path()
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     strokes = [
         (
@@ -161,19 +158,7 @@ def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
         ),
     ]
 
-    ctx.set_line_width(sw)
-    ctx.set_line_cap(cairo.LineCap.ROUND)
-    ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
-
-    for start, end, length in strokes:
-        ctx.move_to(start.x, start.y)
-        ctx.line_to(end.x, end.y)
-        dash_array, dash_offset = get_perfect_dash_props(
-            length, stroke_width, style.dash
-        )
-        ctx.set_dash(dash_array, dash_offset)
-        ctx.stroke()
+    finalize_dash_geo(ctx, strokes, style)
 
 
 def finalize_diamond(

@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    get_perfect_dash_props,
+    finalize_dash_geo,
 )
 
 
@@ -85,9 +85,13 @@ def trapezoid_stroke_points(id: str, shape: Trapezoid) -> List[StrokePoint]:
         points, size=stroke_width, streamline=0.3, last=True
     )
 
+
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
-def draw_trapezoid(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Trapezoid) -> None:
+
+def draw_trapezoid(
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: Trapezoid
+) -> None:
     style = shape.style
 
     stroke = STROKES[style.color]
@@ -97,7 +101,7 @@ def draw_trapezoid(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Trapezo
 
     if style.isFilled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     stroke_outline_points = perfect_freehand.get_stroke_outline_points(
         stroke_points,
@@ -109,7 +113,7 @@ def draw_trapezoid(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Trapezo
     )
     draw_smooth_path(ctx, stroke_outline_points, closed=True)
 
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     ctx.fill_preserve()
     ctx.set_line_width(stroke_width)
     ctx.set_line_cap(cairo.LineCap.ROUND)
@@ -119,13 +123,8 @@ def draw_trapezoid(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Trapezo
 
 def dash_trapezoid(ctx: cairo.Context[CairoSomeSurface], shape: Trapezoid) -> None:
     style = shape.style
-
-    stroke = STROKES[style.color]
-    stroke_width = STROKE_WIDTHS[style.size] * 1.618
-
-    sw = 1 + stroke_width
-    width = max(0, shape.size.width - sw / 2)
-    height = max(0, shape.size.height - sw / 2)
+    width = max(0, shape.size.width)
+    height = max(0, shape.size.height)
 
     top_width = width * 0.6
     x_offset = (width - top_width) / 2
@@ -136,7 +135,7 @@ def dash_trapezoid(ctx: cairo.Context[CairoSomeSurface], shape: Trapezoid) -> No
         ctx.line_to(width, height)
         ctx.line_to(0, height)
         ctx.close_path()
-        apply_geo_fill(ctx, style, shape.opacity)
+        apply_geo_fill(ctx, style)
 
     strokes = [
         (
@@ -161,19 +160,7 @@ def dash_trapezoid(ctx: cairo.Context[CairoSomeSurface], shape: Trapezoid) -> No
         ),
     ]
 
-    ctx.set_line_width(sw)
-    ctx.set_line_cap(cairo.LineCap.ROUND)
-    ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.opacity)
-
-    for start, end, length in strokes:
-        ctx.move_to(start.x, start.y)
-        ctx.line_to(end.x, end.y)
-        dash_array, dash_offset = get_perfect_dash_props(
-            length, stroke_width, style.dash
-        )
-        ctx.set_dash(dash_array, dash_offset)
-        ctx.stroke()
+    finalize_dash_geo(ctx, strokes, style)
 
 
 def finalize_trapezoid(
