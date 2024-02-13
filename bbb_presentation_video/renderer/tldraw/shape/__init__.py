@@ -256,6 +256,9 @@ class TriangleGeo(LabelledShapeProto):
 class Diamond(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
 
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Trapezoid(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TextShape(RotatableShapeProto):
@@ -445,17 +448,17 @@ Shape = Union[
     ArrowShape_v2,
     Diamond,
     DrawShape,
-    RectangleShape,
-    RectangleGeo,
-    EllipseShape,
     EllipseGeo,
-    TriangleShape,
-    TriangleGeo,
-    TextShape,
+    EllipseShape,
     GroupShape,
-    StickyShape,
-    LineShape,
     HighlighterShape,
+    LineShape,
+    RectangleGeo,
+    RectangleShape,
+    StickyShape,
+    TextShape,
+    TriangleGeo,
+    TriangleShape,
 ]
 
 
@@ -498,6 +501,8 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
                 return RectangleGeo.from_data(data)
             if geo_type == "triangle":
                 return TriangleGeo.from_data(data)
+            if geo_type == "trapezoid":
+                return Trapezoid.from_data(data)
 
         raise Exception(f"Unknown geo shape: {type}")
     else:
