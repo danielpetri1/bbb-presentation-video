@@ -251,9 +251,11 @@ class TriangleShape(LabelledShapeProto):
 class TriangleGeo(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
 
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class Diamond(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
+
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TextShape(RotatableShapeProto):

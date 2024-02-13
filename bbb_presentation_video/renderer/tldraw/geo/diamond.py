@@ -28,10 +28,11 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     get_perfect_dash_props,
 )
 
+
 def diamond_stroke_points(id: str, shape: Diamond) -> List[StrokePoint]:
     random = Random(id)
     size = shape.size
-    
+
     width = size.width
     height = size.height
     half_width = size.width / 2
@@ -57,7 +58,7 @@ def diamond_stroke_points(id: str, shape: Diamond) -> List[StrokePoint]:
     l = (
         random.uniform(-variation, variation),
         half_height + random.uniform(-variation, variation),
-        )
+    )
 
     # Which side to start drawing first
     rm = random.randrange(0, 3)
@@ -86,9 +87,8 @@ def diamond_stroke_points(id: str, shape: Diamond) -> List[StrokePoint]:
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
-def draw_diamond(
-    ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond
-) -> None:
+
+def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) -> None:
     style = shape.style
 
     stroke = STROKES[style.color]
@@ -139,10 +139,26 @@ def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
         apply_geo_fill(ctx, style, shape.opacity)
 
     strokes = [
-        (Position(half_width, 0), Position(w, half_height), hypot(w - half_width, half_height)),
-        (Position(w, half_height), Position(half_width, h), hypot(half_width - w, half_height)),
-        (Position(half_width, h), Position(0, half_height), hypot(half_width, half_height)),
-        (Position(0, half_height), Position(half_width, 0), hypot(half_width, half_height)),
+        (
+            Position(half_width, 0),
+            Position(w, half_height),
+            hypot(w - half_width, half_height),
+        ),
+        (
+            Position(w, half_height),
+            Position(half_width, h),
+            hypot(half_width - w, half_height),
+        ),
+        (
+            Position(half_width, h),
+            Position(0, half_height),
+            hypot(half_width, half_height),
+        ),
+        (
+            Position(0, half_height),
+            Position(half_width, 0),
+            hypot(half_width, half_height),
+        ),
     ]
 
     ctx.set_line_width(sw)
