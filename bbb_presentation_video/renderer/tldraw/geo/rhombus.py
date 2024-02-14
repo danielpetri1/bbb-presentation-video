@@ -15,7 +15,7 @@ from perfect_freehand.types import StrokePoint
 from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
-    Diamond,
+    Rhombus,
 )
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
@@ -29,48 +29,49 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 )
 
 
-def diamond_stroke_points(id: str, shape: Diamond) -> List[StrokePoint]:
+def rhombus_stroke_points(id: str, shape: Rhombus) -> List[StrokePoint]:
     random = Random(id)
     size = shape.size
 
     width = size.width
     height = size.height
-    half_width = size.width / 2
-    half_height = size.height / 2
 
+    x_offset = min(width * 0.38, height * 0.38)
     stroke_width = STROKE_WIDTHS[shape.style.size]
 
     # Corners with random offsets
     variation = stroke_width * 0.75
 
-    t = (
-        half_width + random.uniform(-variation, variation),
+    tl = (
+        x_offset + random.uniform(-variation, variation),
         random.uniform(-variation, variation),
     )
-    r = (
+    tr = (
         width + random.uniform(-variation, variation),
-        half_height + random.uniform(-variation, variation),
+        0 + random.uniform(-variation, variation),
     )
-    b = (
-        half_width + random.uniform(-variation, variation),
+    br = (
+        width - x_offset + random.uniform(-variation, variation),
         height + random.uniform(-variation, variation),
     )
-    l = (
+    bl = (
         random.uniform(-variation, variation),
-        half_height + random.uniform(-variation, variation),
+        height + random.uniform(-variation, variation),
     )
 
     # Which side to start drawing first
     rm = random.randrange(0, 3)
-
+    # Number of points per side
+    # Insert each line by the corner radii and let the freehand algo
+    # interpolate points for the corners.
     lines = [
-        vec.points_between(t, r, 32),
-        vec.points_between(r, b, 32),
-        vec.points_between(b, l, 32),
-        vec.points_between(l, t, 32),
+        vec.points_between(tl, tr, 32),
+        vec.points_between(tr, br, 32),
+        vec.points_between(br, bl, 32),
+        vec.points_between(bl, tl, 32),
     ]
-
     lines = lines[rm:] + lines[0:rm]
+
     points = [*lines[0], *lines[1], *lines[2], *lines[3], *lines[0]]
 
     return perfect_freehand.get_stroke_points(
@@ -81,13 +82,13 @@ def diamond_stroke_points(id: str, shape: Diamond) -> List[StrokePoint]:
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
-def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) -> None:
+def draw_rhombus(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Rhombus) -> None:
     style = shape.style
 
     stroke = STROKES[style.color]
     stroke_width = STROKE_WIDTHS[style.size]
 
-    stroke_points = diamond_stroke_points(id, shape)
+    stroke_points = rhombus_stroke_points(id, shape)
 
     if style.isFilled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
@@ -111,61 +112,56 @@ def draw_diamond(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond) 
     ctx.stroke()
 
 
-def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
+def dash_rhombus(ctx: cairo.Context[CairoSomeSurface], shape: Rhombus) -> None:
     style = shape.style
+    width = max(0, shape.size.width)
+    height = max(0, shape.size.height)
 
-    w = max(0, shape.size.width)
-    h = max(0, shape.size.height)
-
-    half_width = w / 2
-    half_height = h / 2
+    # Internal angle between adjacent sides varies with width and height
+    x_offset = min(width * 0.38, height * 0.38)
 
     if style.isFilled:
-        ctx.move_to(half_width, 0)
-        ctx.line_to(w, half_height)
-        ctx.line_to(half_width, h)
-        ctx.line_to(0, half_height)
+        ctx.move_to(x_offset, 0)  # Top left
+        ctx.line_to(width, 0)  # Top right
+        ctx.line_to(width - x_offset, height)  # Bottom right
+        ctx.line_to(0, height)  # Bottom left
         ctx.close_path()
         apply_geo_fill(ctx, style)
 
     strokes = [
         (
-            Position(half_width, 0),
-            Position(w, half_height),
-            hypot(w - half_width, half_height),
+            Position(x_offset, 0),
+            Position(width, 0),
+            width - x_offset,
         ),
         (
-            Position(w, half_height),
-            Position(half_width, h),
-            hypot(half_width - w, half_height),
+            Position(width, 0),
+            Position(width - x_offset, height),
+            hypot(x_offset, height),
         ),
+        (Position(width - x_offset, height), Position(0, height), width - x_offset),
         (
-            Position(half_width, h),
-            Position(0, half_height),
-            hypot(half_width, half_height),
-        ),
-        (
-            Position(0, half_height),
-            Position(half_width, 0),
-            hypot(half_width, half_height),
+            Position(0, height),
+            Position(x_offset, 0),
+            hypot(width - x_offset, height),
         ),
     ]
 
     finalize_dash_geo(ctx, strokes, style)
 
 
-def finalize_diamond(
-    ctx: cairo.Context[CairoSomeSurface], id: str, shape: Diamond
+def finalize_rhombus(
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: Rhombus
 ) -> None:
-    print(f"\tTldraw: Finalizing Diamond: {id}")
+    print(f"\tTldraw: Finalizing Rhombus: {id}")
 
     style = shape.style
 
     ctx.rotate(shape.rotation)
 
     if style.dash is DashStyle.DRAW:
-        draw_diamond(ctx, id, shape)
+        draw_rhombus(ctx, id, shape)
     else:
-        dash_diamond(ctx, shape)
+        dash_rhombus(ctx, shape)
 
     finalize_v2_label(ctx, shape)

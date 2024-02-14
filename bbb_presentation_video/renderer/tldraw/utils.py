@@ -263,6 +263,13 @@ class SplineType(Enum):
     NONE: str = "none"
 
 
+class ArrowGeoType(Enum):
+    UP: str = "up"
+    DOWN: str = "down"
+    LEFT: str = "left"
+    RIGHT: str = "right"
+
+
 def perimeter_of_ellipse(rx: float, ry: float) -> float:
     """Find the approximate perimeter of an ellipse."""
 

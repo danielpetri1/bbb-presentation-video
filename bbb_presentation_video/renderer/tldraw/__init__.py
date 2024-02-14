@@ -19,6 +19,7 @@ from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font
 from bbb_presentation_video.renderer.tldraw.geo.diamond import finalize_diamond
 from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
 from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
+from bbb_presentation_video.renderer.tldraw.geo.rhombus import finalize_rhombus
 from bbb_presentation_video.renderer.tldraw.geo.trapezoid import finalize_trapezoid
 from bbb_presentation_video.renderer.tldraw.geo.triangle import finalize_geo_triangle
 from bbb_presentation_video.renderer.tldraw.shape import (
@@ -33,6 +34,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     LineShape,
     RectangleGeo,
     RectangleShape,
+    Rhombus,
     Shape,
     StickyShape,
     TextShape,
@@ -263,6 +265,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_rectangle(ctx, id, shape)
                 elif isinstance(shape, RectangleGeo):
                     finalize_geo_rectangle(ctx, id, shape)
+                elif isinstance(shape, Rhombus):
+                    finalize_rhombus(ctx, id, shape)
                 elif isinstance(shape, Trapezoid):
                     finalize_trapezoid(ctx, id, shape)
                 elif isinstance(shape, TriangleShape):

@@ -13,6 +13,7 @@ from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.events.tldraw import HandleData, ShapeData
 from bbb_presentation_video.renderer.tldraw.utils import (
     AlignStyle,
+    ArrowGeoType,
     Decoration,
     DrawPoints,
     SplineType,
@@ -275,6 +276,47 @@ class TextShape(RotatableShapeProto):
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
+class Rhombus(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Hexagon(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Cloud(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Star(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class Oval(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class XBox(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class CheckBox(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
+class ArrowGeo(LabelledShapeProto):
+    size: Size = Size(1.0, 1.0)
+    type: ArrowGeoType = ArrowGeoType.RIGHT
+
+
+@attr.s(order=False, slots=True, auto_attribs=True)
 class GroupShape(BaseShapeProto):
     pass
 
@@ -463,6 +505,14 @@ Shape = Union[
     Trapezoid,
     TriangleGeo,
     TriangleShape,
+    Rhombus,
+    Hexagon,
+    Cloud,
+    Star,
+    Oval,
+    XBox,
+    CheckBox,
+    ArrowGeo,
 ]
 
 
@@ -507,6 +557,20 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
                 return TriangleGeo.from_data(data)
             if geo_type == "trapezoid":
                 return Trapezoid.from_data(data)
+            if geo_type == "rhombus":
+                return Rhombus.from_data(data)
+            if geo_type == "hexagon":
+                pass
+            if geo_type == "cloud":
+                pass
+            if geo_type == "star":
+                pass
+            if geo_type == "x-box":
+                pass
+            if geo_type == "checkbox":
+                pass
+            if geo_type in ["arrow-right", "arrow-left", "arrow-up", "arrow-down"]:
+                pass
 
         raise Exception(f"Unknown geo shape: {type}")
     else:
