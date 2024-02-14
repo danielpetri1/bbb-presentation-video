@@ -560,7 +560,7 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
             if geo_type == "rhombus":
                 return Rhombus.from_data(data)
             if geo_type == "hexagon":
-                pass
+                return Hexagon.from_data(data)
             if geo_type == "cloud":
                 pass
             if geo_type == "star":

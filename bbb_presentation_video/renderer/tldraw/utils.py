@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import math
 from enum import Enum
-from math import floor, hypot, pi, sqrt, tau
+from math import cos, floor, hypot, pi, sin, sqrt, tau
 from typing import Dict, List, Sequence, Tuple, TypeVar, Union
 
 import attr
@@ -551,3 +551,41 @@ def finalize_dash_geo(
         )
         ctx.set_dash(dash_array, dash_offset)
         ctx.stroke()
+
+
+def getPolygonVertices(
+    width: float, height: float, sides: int
+) -> List[Tuple[Position, Position, float]]:
+    cx = width / 2
+    cy = height / 2
+    strokes = []
+
+    for i in range(sides):
+        step = tau / sides
+        t = -(tau / 4) + i * step
+        x = cx + cx * cos(t)
+        y = cy + cy * sin(t)
+
+        next_t = -(tau / 4) + ((i + 1) % sides) * step
+        next_x = cx + cx * cos(next_t)
+        next_y = cy + cy * sin(next_t)
+
+        pos1 = Position(x, y)
+        pos2 = Position(next_x, next_y)
+        distance = ((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2) ** 0.5
+
+        strokes.append((pos1, pos2, distance))
+
+    # Adjust positions to ensure the polygon fits within the bounding box starting from (0,0)
+    min_x = min(stroke[0].x for stroke in strokes)
+    min_y = min(stroke[0].y for stroke in strokes)
+
+    for i in range(len(strokes)):
+        stroke = strokes[i]
+        strokes[i] = (
+            Position(stroke[0].x - min_x, stroke[0].y - min_y),
+            Position(stroke[1].x - min_x, stroke[1].y - min_y),
+            stroke[2],
+        )
+
+    return strokes
