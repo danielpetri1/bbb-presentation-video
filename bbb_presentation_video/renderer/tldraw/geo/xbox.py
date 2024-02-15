@@ -16,6 +16,9 @@ from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
     XBox,
 )
+from bbb_presentation_video.renderer.tldraw.shape.rectangle import (
+    rectangle_stroke_points,
+)
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
@@ -26,76 +29,6 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     draw_smooth_stroke_point_path,
     finalize_dash_geo,
 )
-
-
-def x_box_stroke_points(
-    id: str, shape: XBox
-) -> List[perfect_freehand.types.StrokePoint]:
-    random = Random(id)
-    sw = STROKE_WIDTHS[shape.style.size]
-
-    # Dimensions
-    w = max(0, shape.size.width)
-    h = max(0, shape.size.height)
-
-    # Corners
-    variation = sw * 0.75
-    tl = (
-        sw / 2 + random.uniform(-variation, variation),
-        sw / 2 + random.uniform(-variation, variation),
-    )
-    tr = (
-        w - sw / 2 + random.uniform(-variation, variation),
-        sw / 2 + random.uniform(-variation, variation),
-    )
-    br = (
-        w - sw / 2 + random.uniform(-variation, variation),
-        h - sw / 2 + random.uniform(-variation, variation),
-    )
-    bl = (
-        sw / 2 + random.uniform(-variation, variation),
-        h - sw / 2 + random.uniform(-variation, variation),
-    )
-
-    # Which side to start drawing first
-    rm = random.randrange(0, 4)
-
-    # Corner radii
-    rx = min(w / 4, sw * 2)
-    ry = min(h / 4, sw / 2)
-
-    # Number of points per side
-    px = max(8, floor(w / 16))
-    py = max(8, floor(h / 16))
-
-    lines = [
-        vec.points_between(vec.add(tl, (rx, 0)), vec.sub(tr, (rx, 0)), px),
-        vec.points_between(vec.add(tr, (0, ry)), vec.sub(br, (0, ry)), py),
-        vec.points_between(vec.sub(br, (rx, 0)), vec.add(bl, (rx, 0)), px),
-        vec.points_between(vec.sub(bl, (0, ry)), vec.add(tl, (0, ry)), py),
-    ]
-
-    lines = lines[rm:] + lines[0:rm]
-
-    # For the final points, include the first half of the first line again,
-    # so that the line wraps around and avoids ending on a sharp corner.
-    # This has a bit of finesse and magic—if you change the points_between
-    # function, then you'll likely need to change this one too.
-    points: List[Tuple[float, float, float]] = [
-        *lines[0],
-        *lines[1],
-        *lines[2],
-        *lines[3],
-        *lines[0],
-    ]
-
-    return perfect_freehand.get_stroke_points(
-        points[5 : floor(len(lines[0]) / -2) + 3],
-        size=sw,
-        streamline=0.3,
-        last=True,
-    )
-
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
@@ -130,7 +63,7 @@ def draw_x_box(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> No
     is_filled = style.isFilled
     stroke = STROKES[style.color]
     stroke_width = STROKE_WIDTHS[style.size]
-    stroke_points = x_box_stroke_points(id, shape)
+    stroke_points = rectangle_stroke_points(id, shape)
 
     if is_filled:
         draw_smooth_stroke_point_path(ctx, stroke_points, closed=False)
