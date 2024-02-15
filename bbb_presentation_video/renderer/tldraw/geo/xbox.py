@@ -33,7 +33,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
-def draw_x_cross(ctx: cairo.Context[CairoSomeSurface], shape: XBox):
+def draw_x_cross(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
     sw = STROKE_WIDTHS[shape.style.size]
 
     # Dimensions
