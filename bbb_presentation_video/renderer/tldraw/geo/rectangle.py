@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from math import floor
 from random import Random
-from typing import List, Tuple, TypeVar
+from typing import List, Tuple, TypeVar, Union
 
 import cairo
 import perfect_freehand
@@ -14,7 +14,9 @@ from bbb_presentation_video.events.helpers import Position
 
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
+    CheckBox,
     RectangleGeo,
+    XBox,
 )
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
@@ -29,7 +31,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 
 
 def rectangle_stroke_points(
-    id: str, shape: RectangleGeo
+    id: str, shape: Union[RectangleGeo, XBox, CheckBox]
 ) -> List[perfect_freehand.types.StrokePoint]:
     random = Random(id)
     sw = STROKE_WIDTHS[shape.style.size]

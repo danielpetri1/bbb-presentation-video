@@ -16,6 +16,7 @@ from bbb_presentation_video.renderer.presentation import (
     apply_shapes_transform,
 )
 from bbb_presentation_video.renderer.tldraw.fonts import add_fontconfig_app_font_dir
+from bbb_presentation_video.renderer.tldraw.geo.checkbox import finalize_checkmark
 from bbb_presentation_video.renderer.tldraw.geo.diamond import finalize_diamond
 from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
 from bbb_presentation_video.renderer.tldraw.geo.hexagon import finalize_hexagon
@@ -28,6 +29,7 @@ from bbb_presentation_video.renderer.tldraw.geo.xbox import finalize_x_box
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     ArrowShape_v2,
+    CheckBox,
     Diamond,
     DrawShape,
     EllipseShape,
@@ -267,6 +269,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_arrow(ctx, id, shape)
                 elif isinstance(shape, ArrowShape_v2):
                     finalize_arrow_v2(ctx, id, shape)
+                elif isinstance(shape, CheckBox):
+                    finalize_checkmark(ctx, id, shape)
                 elif isinstance(shape, Diamond):
                     finalize_diamond(ctx, id, shape)
                 elif isinstance(shape, DrawShape):

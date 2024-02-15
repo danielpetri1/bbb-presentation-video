@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 from math import hypot
-from typing import TypeVar
+from typing import List, TypeVar
 
 import cairo
 import perfect_freehand
@@ -22,6 +22,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,
     DashStyle,
+    Style,
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
@@ -31,32 +32,58 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
-def overlay_x_cross(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
+def get_check_box_lines(w: float, h: float) -> List[List[List[float, float]]]:
+    size = min(w, h) * 0.82
+    ox = (w - size) / 2
+    oy = (h - size) / 2
+
+    def clamp_x(x):
+        return max(0, min(w, x))
+
+    def clamp_y(y):
+        return max(0, min(h, y))
+
+    return [
+        [
+            [clamp_x(ox + size * 0.25), clamp_y(oy + size * 0.52)],
+            [clamp_x(ox + size * 0.45), clamp_y(oy + size * 0.82)],
+        ],
+        [
+            [clamp_x(ox + size * 0.45), clamp_y(oy + size * 0.82)],
+            [clamp_x(ox + size * 0.82), clamp_y(oy + size * 0.22)],
+        ],
+    ]
+
+
+def overlay_checkmark(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
     sw = STROKE_WIDTHS[shape.style.size]
 
-    # Dimensions
+    # Calculate dimensions
     w = max(0, shape.size.width)
     h = max(0, shape.size.height)
 
-    x_offset = 2 * min(w / 4, sw * 2)
-    y_offset = 2 * min(h / 4, sw / 2)
+    # Get checkmark lines based on the dimensions
+    lines = get_check_box_lines(w, h)
 
-    tl = (x_offset, y_offset)
-    tr = (w - x_offset, y_offset)
+    stroke = STROKES[shape.style.color]
 
-    br = (w - x_offset, h - y_offset)
-    bl = (x_offset, h - y_offset)
+    sw = 1 + sw
 
-    ctx.move_to(*tl)
-    ctx.line_to(*br)
-    ctx.move_to(*tr)
-    ctx.line_to(*bl)
-    ctx.set_line_width(2 * sw)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.style.opacity)
+
+    # Set stroke width and other drawing properties
+    ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
+    ctx.set_line_join(cairo.LineJoin.ROUND)
+
+    # Draw each line of the checkmark
+    for start, end in lines:
+        for point in [start, end]:
+            ctx.line_to(*point)
     ctx.stroke()
 
 
-def draw_x_box(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> None:
+def draw_checkbox(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> None:
     style = shape.style
     is_filled = style.isFilled
     stroke = STROKES[style.color]
@@ -85,10 +112,10 @@ def draw_x_box(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> No
     ctx.set_line_join(cairo.LineJoin.ROUND)
     ctx.stroke()
 
-    overlay_x_cross(ctx, shape)
+    overlay_checkmark(ctx, shape)
 
 
-def dash_x_box(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
+def dash_checkbox(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
     style = shape.style
 
     w = max(0, shape.size.width)
@@ -107,21 +134,22 @@ def dash_x_box(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
         (Position(w, 0), Position(w, h), h),
         (Position(w, h), Position(0, h), w),
         (Position(0, h), Position(0, 0), h),
-        (Position(0, h), Position(w, 0), hypot(w, h)),
-        (Position(0, 0), Position(w, h), hypot(w, h)),
     ]
 
+    overlay_checkmark(ctx, shape)
     finalize_dash_geo(ctx, strokes, style)
 
 
-def finalize_x_box(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> None:
-    print(f"\tTldraw: Finalizing x-box: {id}")
+def finalize_checkmark(
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox
+) -> None:
+    print(f"\tTldraw: Finalizing checkmark: {id}")
 
     ctx.rotate(shape.rotation)
 
     if shape.style.dash is DashStyle.DRAW:
-        draw_x_box(ctx, id, shape)
+        draw_checkbox(ctx, id, shape)
     else:
-        dash_x_box(ctx, shape)
+        dash_checkbox(ctx, shape)
 
     finalize_v2_label(ctx, shape)

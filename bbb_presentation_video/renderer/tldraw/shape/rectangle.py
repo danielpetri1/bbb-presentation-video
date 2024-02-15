@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from math import floor
 from random import Random
-from typing import List, Tuple, TypeVar, Union
+from typing import List, Tuple, TypeVar
 
 import cairo
 import perfect_freehand
@@ -14,7 +14,6 @@ import perfect_freehand
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
     RectangleShape,
-    XBox,
     apply_shape_rotation,
 )
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_label
@@ -30,7 +29,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 
 
 def rectangle_stroke_points(
-    id: str, shape: Union[RectangleShape, XBox]
+    id: str, shape: RectangleShape
 ) -> List[perfect_freehand.types.StrokePoint]:
     random = Random(id)
     sw = STROKE_WIDTHS[shape.style.size]
@@ -69,7 +68,7 @@ def rectangle_stroke_points(
     px = max(8, floor(w / 16))
     py = max(8, floor(h / 16))
 
-    # Insert each line by the corner radii and let the freehand algo
+    # Inset each line by the corner radii and let the freehand algo
     # interpolate points for the corners.
     lines = [
         vec.points_between(vec.add(tl, (rx, 0)), vec.sub(tr, (rx, 0)), px),
