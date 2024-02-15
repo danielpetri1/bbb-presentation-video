@@ -8,6 +8,7 @@ import math
 from enum import Enum
 from math import cos, floor, hypot, pi, sin, sqrt, tau
 from typing import Dict, List, Sequence, Tuple, TypeVar, Union
+from random import Random
 
 import attr
 import cairo
@@ -553,7 +554,7 @@ def finalize_dash_geo(
         ctx.stroke()
 
 
-def getPolygonVertices(
+def get_polygon_strokes(
     width: float, height: float, sides: int
 ) -> List[Tuple[Position, Position, float]]:
     cx = width / 2
@@ -589,3 +590,37 @@ def getPolygonVertices(
         )
 
     return strokes
+
+
+def get_polygon_draw_vertices(
+    strokes: List[Tuple[Position, Position, float]], stroke_width: float, id: str
+) -> List[Tuple[float, float, float]]:
+    random = Random(id)
+    # Generate vertices with added variation
+    variation = stroke_width * 0.75
+    v_points = [
+        (
+            stroke[0].x + random.uniform(-variation, variation),
+            stroke[0].y + random.uniform(-variation, variation),
+        )
+        for stroke in strokes
+    ]
+
+    # Determine the random start index for drawing
+    rm = random.randrange(0, len(v_points))
+
+    # Generate lines between points with added variation
+    lines = [
+        vec.points_between(v_points[i], v_points[(i + 1) % len(v_points)], 32)
+        for i in range(len(v_points))
+    ]
+
+    lines = lines[rm:] + lines[:rm]
+
+    # Flatten the list of lines to get a single list of points, ensuring the start point is duplicated at the end for closure
+    points = []
+    for line in lines:
+        points.extend(line)
+
+    points.extend(lines[0])  # Add start point again at the end
+    return points
