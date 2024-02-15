@@ -566,7 +566,7 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
             if geo_type == "star":
                 return Star.from_data(data)
             if geo_type == "x-box":
-                pass
+                return XBox.from_data(data)
             if geo_type == "checkbox":
                 pass
             if geo_type in ["arrow-right", "arrow-left", "arrow-up", "arrow-down"]:

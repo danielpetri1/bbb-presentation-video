@@ -24,6 +24,7 @@ from bbb_presentation_video.renderer.tldraw.geo.rhombus import finalize_rhombus
 from bbb_presentation_video.renderer.tldraw.geo.star import finalize_star
 from bbb_presentation_video.renderer.tldraw.geo.trapezoid import finalize_trapezoid
 from bbb_presentation_video.renderer.tldraw.geo.triangle import finalize_geo_triangle
+from bbb_presentation_video.renderer.tldraw.geo.xbox import finalize_x_box
 from bbb_presentation_video.renderer.tldraw.shape import (
     ArrowShape,
     ArrowShape_v2,
@@ -45,6 +46,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     Trapezoid,
     TriangleShape,
     TriangleGeo,
+    XBox,
     parse_shape_from_data,
     shape_sort_key,
 )
@@ -261,43 +263,45 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                 ctx.push_group()
 
                 ctx.translate(*shape.point)
-                if isinstance(shape, Diamond):
+                if isinstance(shape, ArrowShape):
+                    finalize_arrow(ctx, id, shape)
+                elif isinstance(shape, ArrowShape_v2):
+                    finalize_arrow_v2(ctx, id, shape)
+                elif isinstance(shape, Diamond):
                     finalize_diamond(ctx, id, shape)
                 elif isinstance(shape, DrawShape):
                     finalize_draw(ctx, id, shape)
-                elif isinstance(shape, EllipseShape):
-                    finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, EllipseGeo):
                     finalize_geo_ellipse(ctx, id, shape)
+                elif isinstance(shape, EllipseShape):
+                    finalize_ellipse(ctx, id, shape)
                 elif isinstance(shape, Hexagon):
                     finalize_hexagon(ctx, id, shape)
-                elif isinstance(shape, RectangleShape):
-                    finalize_rectangle(ctx, id, shape)
+                elif isinstance(shape, HighlighterShape):
+                    finalize_highlight(ctx, id, shape)
+                elif isinstance(shape, LineShape):
+                    finalize_line(ctx, id, shape)
                 elif isinstance(shape, RectangleGeo):
                     finalize_geo_rectangle(ctx, id, shape)
+                elif isinstance(shape, RectangleShape):
+                    finalize_rectangle(ctx, id, shape)
                 elif isinstance(shape, Rhombus):
                     finalize_rhombus(ctx, id, shape)
                 elif isinstance(shape, Star):
                     finalize_star(ctx, id, shape)
                 elif isinstance(shape, Trapezoid):
                     finalize_trapezoid(ctx, id, shape)
-                elif isinstance(shape, TriangleShape):
-                    finalize_triangle(ctx, id, shape)
                 elif isinstance(shape, TriangleGeo):
                     finalize_geo_triangle(ctx, id, shape)
-
-                elif isinstance(shape, ArrowShape):
-                    finalize_arrow(ctx, id, shape)
-                elif isinstance(shape, ArrowShape_v2):
-                    finalize_arrow_v2(ctx, id, shape)
-                elif isinstance(shape, LineShape):
-                    finalize_line(ctx, id, shape)
+                elif isinstance(shape, TriangleShape):
+                    finalize_triangle(ctx, id, shape)
                 elif isinstance(shape, TextShape):
                     finalize_text(ctx, id, shape)
                 elif isinstance(shape, StickyShape):
                     finalize_sticky(ctx, shape)
-                elif isinstance(shape, HighlighterShape):
-                    finalize_highlight(ctx, id, shape)
+                elif isinstance(shape, XBox):
+                    finalize_x_box(ctx, id, shape)
+
                 elif isinstance(shape, GroupShape):
                     # Nothing to do? All group-related updates seem to be propagated to the
                     # individual shapes in the group.
