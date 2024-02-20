@@ -566,11 +566,11 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
             if geo_type is GeoShape.HEXAGON:
                 return Hexagon.from_data(data)
             if geo_type is GeoShape.CLOUD:
-                pass
+                return Cloud.from_data(data)
             if geo_type is GeoShape.STAR:
                 return Star.from_data(data)
             if geo_type is GeoShape.OVAL:
-                return XBox.from_data(data)
+                return Oval.from_data(data)
             if geo_type is GeoShape.CHECKBOX:
                 return CheckBox.from_data(data)
             if geo_type in [
@@ -580,7 +580,8 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
                 GeoShape.ARROW_UP,
             ]:
                 return ArrowGeo.from_data(data)
-
+            if geo_type is GeoShape.OVAL:
+                return Oval.from_data(data)
         raise Exception(f"Unknown geo shape: {type}")
     else:
         raise Exception(f"Unknown shape type: {type}")

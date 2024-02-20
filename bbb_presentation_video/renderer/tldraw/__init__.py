@@ -21,6 +21,7 @@ from bbb_presentation_video.renderer.tldraw.geo.checkbox import finalize_checkma
 from bbb_presentation_video.renderer.tldraw.geo.diamond import finalize_diamond
 from bbb_presentation_video.renderer.tldraw.geo.ellipse import finalize_geo_ellipse
 from bbb_presentation_video.renderer.tldraw.geo.hexagon import finalize_hexagon
+from bbb_presentation_video.renderer.tldraw.geo.oval import finalize_oval
 from bbb_presentation_video.renderer.tldraw.geo.rectangle import finalize_geo_rectangle
 from bbb_presentation_video.renderer.tldraw.geo.rhombus import finalize_rhombus
 from bbb_presentation_video.renderer.tldraw.geo.star import finalize_star
@@ -40,6 +41,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     Hexagon,
     HighlighterShape,
     LineShape,
+    Oval,
     RectangleGeo,
     RectangleShape,
     Rhombus,
@@ -289,6 +291,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_highlight(ctx, id, shape)
                 elif isinstance(shape, LineShape):
                     finalize_line(ctx, id, shape)
+                elif isinstance(shape, Oval):
+                    finalize_oval(ctx, id, shape)
                 elif isinstance(shape, RectangleGeo):
                     finalize_geo_rectangle(ctx, id, shape)
                 elif isinstance(shape, RectangleShape):

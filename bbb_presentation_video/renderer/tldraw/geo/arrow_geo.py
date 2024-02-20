@@ -4,9 +4,9 @@
 
 from __future__ import annotations
 
-from math import floor, tau
+from math import floor
 from random import Random
-from typing import List, Tuple, TypeVar, Union
+from typing import List, Tuple, TypeVar
 
 import cairo
 import perfect_freehand

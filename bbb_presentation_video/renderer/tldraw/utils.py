@@ -491,27 +491,25 @@ def pattern_fill(fill: Color, opacity: float = 1) -> cairo.SurfacePattern:
     surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 8, 8)
     ctx = cairo.Context(surface)
 
-    # Draw the hash pattern
+    # RGB for #fcfffe
+    ctx.set_source_rgba(252 / 255, 255 / 255, 254 / 255, opacity)
     ctx.rectangle(0, 0, 8, 8)
-
-    # Set the background to white
-    ctx.set_source_rgba(1, 1, 1, opacity)
-    ctx.fill_preserve()
+    ctx.fill()
 
     ctx.set_line_cap(cairo.LINE_CAP_ROUND)
-
-    # Set the pattern fill color
     ctx.set_source_rgba(fill.r, fill.g, fill.b, opacity)
 
-    # Draw the hash lines
-    ctx.move_to(0.66, 2)
-    ctx.line_to(2, 0.66)
-    ctx.move_to(3.33, 4.66)
-    ctx.line_to(4.66, 3.33)
-    ctx.move_to(6, 7.33)
-    ctx.line_to(7.33, 6)
+    lines = [
+        (0.66, 2, 2, 0.66),
+        (3.33, 4.66, 4.66, 3.33),
+        (6, 7.33, 7.33, 6),
+    ]
 
-    ctx.set_line_width(1)
+    for x1, y1, x2, y2 in lines:
+        ctx.move_to(x1, y1)
+        ctx.line_to(x2, y2)
+
+    ctx.set_line_width(2)
     ctx.stroke()
 
     pattern = cairo.SurfacePattern(surface)
@@ -565,6 +563,47 @@ def finalize_dash_geo(
         )
         ctx.set_dash(dash_array, dash_offset)
         ctx.stroke()
+
+
+def finalize_geo_path(
+    ctx: cairo.Context[CairoSomeSurface],
+    points: List[Tuple[Position, Position, float]],
+    style: Style,
+) -> None:
+
+    if style.isFilled:
+        ctx.move_to(points[0].x, points[0].y)
+
+        for point in points[1:]:
+            ctx.line_to(point.x, point.y)
+
+        ctx.close_path()
+        apply_geo_fill(ctx, style)
+
+    stroke = STROKES[style.color]
+    stroke_width = STROKE_WIDTHS[style.size] * 1.618
+
+    sw = 1 + stroke_width
+
+    ctx.set_line_width(sw)
+    ctx.set_line_cap(cairo.LineCap.ROUND)
+    ctx.set_line_join(cairo.LineJoin.ROUND)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
+
+    dist = 0
+    ctx.move_to(points[0].x, points[0].y)
+
+    for i in range(1, len(points)):
+        dist += vec.dist(points[i - 1], points[i])
+        ctx.line_to(points[i].x, points[i].y)
+
+    dist += vec.dist(points[-1], points[0])
+    ctx.close_path()
+
+    dash_array, dash_offset = get_perfect_dash_props(dist, stroke_width, style.dash)
+
+    ctx.set_dash(dash_array, dash_offset)
+    ctx.stroke()
 
 
 def get_polygon_strokes(
