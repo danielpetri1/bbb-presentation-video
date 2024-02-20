@@ -540,34 +540,9 @@ def apply_geo_fill(ctx: cairo.Context[CairoSomeSurface], style: Style) -> None:
     ctx.fill()
 
 
-def finalize_dash_geo(
-    ctx: cairo.Context[CairoSomeSurface],
-    strokes: List[Tuple[Position, Position, float]],
-    style: Style,
-) -> None:
-    stroke = STROKES[style.color]
-    stroke_width = STROKE_WIDTHS[style.size] * 1.618
-
-    sw = 1 + stroke_width
-
-    ctx.set_line_width(sw)
-    ctx.set_line_cap(cairo.LineCap.ROUND)
-    ctx.set_line_join(cairo.LineJoin.ROUND)
-    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
-
-    for start, end, length in strokes:
-        ctx.move_to(start.x, start.y)
-        ctx.line_to(end.x, end.y)
-        dash_array, dash_offset = get_perfect_dash_props(
-            length, stroke_width, style.dash
-        )
-        ctx.set_dash(dash_array, dash_offset)
-        ctx.stroke()
-
-
 def finalize_geo_path(
     ctx: cairo.Context[CairoSomeSurface],
-    points: List[Tuple[Position, Position, float]],
+    points: List[Position],
     style: Style,
 ) -> None:
 
@@ -590,7 +565,7 @@ def finalize_geo_path(
     ctx.set_line_join(cairo.LineJoin.ROUND)
     ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
 
-    dist = 0
+    dist: float = 0
     ctx.move_to(points[0].x, points[0].y)
 
     for i in range(1, len(points)):

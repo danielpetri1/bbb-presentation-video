@@ -22,14 +22,12 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
     get_polygon_draw_vertices,
 )
 
 
-def get_star_strokes(
-    w: float, h: float, n: int
-) -> List[Tuple[Position, Position, float]]:
+def get_star_points(w: float, h: float, n: int) -> List[Position]:
     sides = n
     step = tau / sides / 2
 
@@ -39,8 +37,6 @@ def get_star_strokes(
     ox, oy = (w / 2, h / 2)
     ix, iy = (ox * ratio) / 2, (oy * ratio) / 2
 
-    strokes = []
-
     points = [
         Position(
             cx + (ix if i % 2 else ox) * cos(-(tau / 4) + i * step),
@@ -49,13 +45,7 @@ def get_star_strokes(
         for i in range(sides * 2)
     ]
 
-    for i in range(len(points)):
-        pos1 = points[i]
-        pos2 = points[(i + 1) % len(points)]
-        distance = ((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2) ** 0.5
-        strokes.append((pos1, pos2, distance))
-
-    return strokes
+    return points
 
 
 def star_stroke_points(id: str, shape: Star) -> List[StrokePoint]:
@@ -71,7 +61,15 @@ def star_stroke_points(id: str, shape: Star) -> List[StrokePoint]:
 
     vertices = 5
 
-    strokes = get_star_strokes(width, height, vertices)
+    star_points = get_star_points(width, height, vertices)
+    strokes = []
+
+    for i in range(len(star_points)):
+        pos1 = star_points[i]
+        pos2 = star_points[(i + 1) % len(star_points)]
+        distance = ((pos2.x - pos1.x) ** 2 + (pos2.y - pos1.y) ** 2) ** 0.5
+        strokes.append((pos1, pos2, distance))
+
     points = get_polygon_draw_vertices(strokes, stroke_width, id)
 
     return perfect_freehand.get_stroke_points(
@@ -118,15 +116,9 @@ def dash_star(ctx: cairo.Context[CairoSomeSurface], shape: Star) -> None:
     height = max(0, shape.size.height)
 
     vertices = 5
-    strokes = get_star_strokes(width, height, vertices)
+    points = get_star_points(width, height, vertices)
 
-    if style.isFilled:
-        for i in range(len(strokes)):
-            ctx.line_to(strokes[i][0].x, strokes[i][0].y)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_star(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Star) -> None:

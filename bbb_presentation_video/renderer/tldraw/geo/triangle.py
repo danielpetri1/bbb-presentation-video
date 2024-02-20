@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -119,26 +119,14 @@ def dash_triangle(ctx: cairo.Context[CairoSomeSurface], shape: TriangleGeo) -> N
     w = max(0, shape.size.width)
     h = max(0, shape.size.height)
 
-    side_width = hypot(w / 2, h)
-
-    if style.isFilled:
-        ctx.move_to(w / 2, 0)
-        ctx.line_to(w, h)
-        ctx.line_to(0, h)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (Position(w / 2, 0), Position(w, h), side_width),
-        (Position(w, h), Position(0, h), w),
-        (Position(0, h), Position(w / 2, 0), side_width),
+    points = [
+        Position(w / 2, 0),
+        Position(w, h),
+        Position(0, h),
+        Position(w / 2, 0),
     ]
 
-    finalize_dash_geo(
-        ctx,
-        strokes,
-        style,
-    )
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_geo_triangle(

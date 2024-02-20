@@ -23,7 +23,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -291,25 +291,7 @@ def dash_geo_arrow(ctx: cairo.Context[CairoSomeSurface], shape: ArrowGeo) -> Non
             Position(0, h - oy),
         ]
 
-    if style.isFilled:
-        ctx.move_to(points[0].x, points[0].y)
-
-        for point in points[1:]:
-            ctx.line_to(point.x, point.y)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (points[0], points[1], w - ox),
-        (points[1], points[2], oy),
-        (points[2], points[3], h / 2),
-        (points[3], points[4], oy),
-        (points[4], points[5], w - ox),
-        (points[5], points[6], oy),
-        (points[6], points[0], h - oy),
-    ]
-
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_geo_arrow(

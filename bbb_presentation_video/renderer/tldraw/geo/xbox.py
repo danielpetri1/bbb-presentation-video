@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
-
-from math import hypot
 from typing import TypeVar
 
 import cairo
@@ -25,7 +23,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
@@ -38,8 +36,10 @@ def overlay_x_cross(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
     w = max(0, shape.size.width)
     h = max(0, shape.size.height)
 
-    x_offset = 2 * min(w / 4, sw * 2)
-    y_offset = 2 * min(h / 4, sw / 2)
+    # The cross doesn't touch the vertices of the box to
+    # prevent opacities from adding up
+    x_offset = 2 * sw
+    y_offset = 2 * sw
 
     tl = (x_offset, y_offset)
     tr = (w - x_offset, y_offset)
@@ -94,24 +94,15 @@ def dash_x_box(ctx: cairo.Context[CairoSomeSurface], shape: XBox) -> None:
     w = max(0, shape.size.width)
     h = max(0, shape.size.height)
 
-    if style.isFilled:
-        ctx.move_to(0, 0)
-        ctx.line_to(w, 0)
-        ctx.line_to(w, h)
-        ctx.line_to(0, h)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (Position(0, 0), Position(w, 0), w),
-        (Position(w, 0), Position(w, h), h),
-        (Position(w, h), Position(0, h), w),
-        (Position(0, h), Position(0, 0), h),
-        (Position(0, h), Position(w, 0), hypot(w, h)),
-        (Position(0, 0), Position(w, h), hypot(w, h)),
+    points = [
+        Position(0, 0),
+        Position(w, 0),
+        Position(w, h),
+        Position(0, h),
     ]
 
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
+    overlay_x_cross(ctx, shape)
 
 
 def finalize_x_box(ctx: cairo.Context[CairoSomeSurface], id: str, shape: XBox) -> None:

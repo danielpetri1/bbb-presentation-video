@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from math import hypot
 from random import Random
 from typing import List, TypeVar
 
@@ -25,7 +24,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -117,35 +116,14 @@ def dash_rhombus(ctx: cairo.Context[CairoSomeSurface], shape: Rhombus) -> None:
 
     # Internal angle between adjacent sides varies with width and height
     x_offset = min(width * 0.38, height * 0.38)
-
-    if style.isFilled:
-        ctx.move_to(x_offset, 0)  # Top left
-        ctx.line_to(width, 0)  # Top right
-        ctx.line_to(width - x_offset, height)  # Bottom right
-        ctx.line_to(0, height)  # Bottom left
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (
-            Position(x_offset, 0),
-            Position(width, 0),
-            width - x_offset,
-        ),
-        (
-            Position(width, 0),
-            Position(width - x_offset, height),
-            hypot(x_offset, height),
-        ),
-        (Position(width - x_offset, height), Position(0, height), width - x_offset),
-        (
-            Position(0, height),
-            Position(x_offset, 0),
-            hypot(width - x_offset, height),
-        ),
+    points = [
+        Position(x_offset, 0),
+        Position(width, 0),
+        Position(width - x_offset, height),
+        Position(0, height),
+        Position(x_offset, 0),
     ]
-
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_rhombus(

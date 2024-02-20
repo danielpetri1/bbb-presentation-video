@@ -26,7 +26,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -141,22 +141,9 @@ def dash_rectangle(ctx: cairo.Context[CairoSomeSurface], shape: RectangleGeo) ->
     w = max(0, shape.size.width)
     h = max(0, shape.size.height)
 
-    if style.isFilled:
-        ctx.move_to(0, 0)
-        ctx.line_to(w, 0)
-        ctx.line_to(w, h)
-        ctx.line_to(0, h)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
+    points = [Position(0, 0), Position(w, 0), Position(w, h), Position(0, h)]
 
-    strokes = [
-        (Position(0, 0), Position(w, 0), w),
-        (Position(w, 0), Position(w, h), h),
-        (Position(w, h), Position(0, h), w),
-        (Position(0, h), Position(0, 0), h),
-    ]
-
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_geo_rectangle(

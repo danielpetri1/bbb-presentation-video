@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from math import cos, sin, tau
 from random import Random
-from typing import TypeVar
+from typing import List, TypeVar, Union
 
 import cairo
 from bbb_presentation_video.events.helpers import Position
@@ -21,11 +21,11 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
-def oval_points(w: float, h: float, n_vertices: int = 25):
+def oval_points(w: float, h: float, n_vertices: int = 25) -> List[Position]:
     cx = w / 2
     cy = h / 2
 
-    points = [None] * (n_vertices * 2 - 2)
+    points: List[Position] = [Position(0, 0)] * (n_vertices * 2 - 2)
 
     if h > w:
         for i in range(n_vertices - 1):
@@ -45,9 +45,6 @@ def oval_points(w: float, h: float, n_vertices: int = 25):
             )
 
     return points
-
-
-CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
 def dash_oval(ctx: cairo.Context[CairoSomeSurface], shape: Oval) -> None:

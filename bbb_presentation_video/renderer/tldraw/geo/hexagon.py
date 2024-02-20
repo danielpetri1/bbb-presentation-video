@@ -21,7 +21,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
     get_polygon_draw_vertices,
     get_polygon_strokes,
 )
@@ -89,14 +89,9 @@ def dash_hexagon(ctx: cairo.Context[CairoSomeSurface], shape: Hexagon) -> None:
     sides = 6
 
     strokes = get_polygon_strokes(width, height, sides)
+    points = [stroke[0] for stroke in strokes]
 
-    if style.isFilled:
-        for i in range(sides):
-            ctx.line_to(strokes[i][0].x, strokes[i][0].y)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_hexagon(

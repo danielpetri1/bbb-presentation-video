@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -120,38 +120,14 @@ def dash_diamond(ctx: cairo.Context[CairoSomeSurface], shape: Diamond) -> None:
     half_width = w / 2
     half_height = h / 2
 
-    if style.isFilled:
-        ctx.move_to(half_width, 0)
-        ctx.line_to(w, half_height)
-        ctx.line_to(half_width, h)
-        ctx.line_to(0, half_height)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (
-            Position(half_width, 0),
-            Position(w, half_height),
-            hypot(w - half_width, half_height),
-        ),
-        (
-            Position(w, half_height),
-            Position(half_width, h),
-            hypot(half_width - w, half_height),
-        ),
-        (
-            Position(half_width, h),
-            Position(0, half_height),
-            hypot(half_width, half_height),
-        ),
-        (
-            Position(0, half_height),
-            Position(half_width, 0),
-            hypot(half_width, half_height),
-        ),
+    points = [
+        Position(half_width, 0),
+        Position(w, half_height),
+        Position(half_width, h),
+        Position(0, half_height),
     ]
 
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_diamond(

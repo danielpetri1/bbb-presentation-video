@@ -25,7 +25,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     apply_geo_fill,
     draw_smooth_path,
     draw_smooth_stroke_point_path,
-    finalize_dash_geo,
+    finalize_geo_path,
 )
 
 
@@ -129,38 +129,14 @@ def dash_trapezoid(ctx: cairo.Context[CairoSomeSurface], shape: Trapezoid) -> No
     top_width = width * 0.6
     x_offset = (width - top_width) / 2
 
-    if style.isFilled:
-        ctx.move_to(x_offset, 0)
-        ctx.line_to(x_offset + top_width, 0)
-        ctx.line_to(width, height)
-        ctx.line_to(0, height)
-        ctx.close_path()
-        apply_geo_fill(ctx, style)
-
-    strokes = [
-        (
-            Position(x_offset, 0),
-            Position(top_width + x_offset, 0),
-            top_width,
-        ),
-        (
-            Position(top_width + x_offset, 0),
-            Position(width, height),
-            hypot(x_offset, height),
-        ),
-        (
-            Position(width, height),
-            Position(0, height),
-            width,
-        ),
-        (
-            Position(0, height),
-            Position(x_offset, 0),
-            hypot(x_offset, height),
-        ),
+    points = [
+        Position(x_offset, 0),
+        Position(top_width + x_offset, 0),
+        Position(width, height),
+        Position(0, height),
     ]
 
-    finalize_dash_geo(ctx, strokes, style)
+    finalize_geo_path(ctx, points, style)
 
 
 def finalize_trapezoid(
