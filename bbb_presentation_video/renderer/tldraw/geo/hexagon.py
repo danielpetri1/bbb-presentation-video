@@ -4,14 +4,12 @@
 
 from __future__ import annotations
 
-from random import Random
 from typing import List, TypeVar
 
 import cairo
 import perfect_freehand
 from perfect_freehand.types import StrokePoint
 
-from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
     Hexagon,
 )

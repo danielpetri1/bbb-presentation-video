@@ -13,7 +13,7 @@ from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.events.tldraw import HandleData, ShapeData
 from bbb_presentation_video.renderer.tldraw.utils import (
     AlignStyle,
-    ArrowGeoType,
+    GeoShape,
     Decoration,
     DrawPoints,
     SplineType,
@@ -112,6 +112,9 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
     verticalAlign: AlignStyle = AlignStyle.MIDDLE
     """Vertical alignment of the label."""
 
+    geo: GeoShape = GeoShape.NONE
+    """Which geo type the shape is, if any."""
+
     def label_offset(self) -> Position:
         """Calculate the offset needed when drawing the label for most shapes."""
         return Position(
@@ -135,6 +138,8 @@ class LabelledShapeProto(RotatableShapeProto, Protocol):
                 self.align = AlignStyle(props["align"])
             if "verticalAlign" in props:
                 self.verticalAlign = AlignStyle(props["verticalAlign"])
+            if "geo" in props:
+                self.geo = GeoShape(props["geo"])
 
 
 def shape_sort_key(shape: BaseShapeProto) -> float:
@@ -313,7 +318,6 @@ class CheckBox(LabelledShapeProto):
 @attr.s(order=False, slots=True, auto_attribs=True)
 class ArrowGeo(LabelledShapeProto):
     size: Size = Size(1.0, 1.0)
-    type: ArrowGeoType = ArrowGeoType.RIGHT
 
 
 @attr.s(order=False, slots=True, auto_attribs=True)
@@ -545,32 +549,37 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         return HighlighterShape.from_data(data)
     elif type == "geo":
         if "geo" in data["props"]:
-            geo_type = data["props"]["geo"]
+            geo_type = GeoShape(data["props"]["geo"])
 
-            if geo_type == "diamond":
+            if geo_type is GeoShape.DIAMOND:
                 return Diamond.from_data(data)
-            if geo_type == "ellipse":
+            if geo_type is GeoShape.ELLIPSE:
                 return EllipseGeo.from_data(data)
-            if geo_type == "rectangle":
+            if geo_type is GeoShape.RECTANGLE:
                 return RectangleGeo.from_data(data)
-            if geo_type == "triangle":
+            if geo_type is GeoShape.TRIANGLE:
                 return TriangleGeo.from_data(data)
-            if geo_type == "trapezoid":
+            if geo_type is GeoShape.TRAPEZOID:
                 return Trapezoid.from_data(data)
-            if geo_type == "rhombus":
+            if geo_type is GeoShape.RHOMBUS:
                 return Rhombus.from_data(data)
-            if geo_type == "hexagon":
+            if geo_type is GeoShape.HEXAGON:
                 return Hexagon.from_data(data)
-            if geo_type == "cloud":
+            if geo_type is GeoShape.CLOUD:
                 pass
-            if geo_type == "star":
+            if geo_type is GeoShape.STAR:
                 return Star.from_data(data)
-            if geo_type == "x-box":
+            if geo_type is GeoShape.OVAL:
                 return XBox.from_data(data)
-            if geo_type == "check-box":
+            if geo_type is GeoShape.CHECKBOX:
                 return CheckBox.from_data(data)
-            if geo_type in ["arrow-right", "arrow-left", "arrow-up", "arrow-down"]:
-                pass
+            if geo_type in [
+                GeoShape.ARROW_DOWN,
+                GeoShape.ARROW_LEFT,
+                GeoShape.ARROW_RIGHT,
+                GeoShape.ARROW_UP,
+            ]:
+                return ArrowGeo.from_data(data)
 
         raise Exception(f"Unknown geo shape: {type}")
     else:

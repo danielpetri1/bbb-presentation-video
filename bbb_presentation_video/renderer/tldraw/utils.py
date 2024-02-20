@@ -264,11 +264,24 @@ class SplineType(Enum):
     NONE: str = "none"
 
 
-class ArrowGeoType(Enum):
-    UP: str = "up"
-    DOWN: str = "down"
-    LEFT: str = "left"
-    RIGHT: str = "right"
+class GeoShape(Enum):
+    ARROW_DOWN: str = "arrow-down"
+    ARROW_LEFT: str = "arrow-left"
+    ARROW_RIGHT: str = "arrow-right"
+    ARROW_UP: str = "arrow-up"
+    CHECKBOX: str = "check-box"
+    CLOUD: str = "cloud"
+    DIAMOND: str = "diamond"
+    ELLIPSE: str = "ellipse"
+    HEXAGON: str = "hexagon"
+    NONE: str = ""
+    OVAL: str = "oval"
+    RECTANGLE: str = "rectangle"
+    RHOMBUS: str = "rhombus"
+    STAR: str = "star"
+    TRAPEZOID: str = "trapezoid"
+    TRIANGLE: str = "triangle"
+    XBOX: str = "x-box"
 
 
 def perimeter_of_ellipse(rx: float, ry: float) -> float:

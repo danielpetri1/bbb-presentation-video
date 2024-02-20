@@ -11,8 +11,6 @@ import cairo
 import perfect_freehand
 from perfect_freehand.types import StrokePoint
 from bbb_presentation_video.events.helpers import Position
-
-from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import (
     Star,
 )
