@@ -120,12 +120,15 @@ def points_between(a: S, b: S, steps: int = 6) -> List[Tuple[float, float, float
         points.append((*lrp(a, b, t), k))
     return points
 
+
 def to_position(a: S) -> Position:
     """Convert a vector to a Position."""
     return Position(a[0], a[1])
 
+
 def from_angle(r: float, length: float) -> Tuple[float, float]:
     return (cos(r) * length, sin(r) * length)
 
+
 def is_left(a: S, b: S, c: S) -> bool:
-	return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0
+    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0

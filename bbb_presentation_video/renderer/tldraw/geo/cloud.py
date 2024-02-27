@@ -29,18 +29,24 @@ from bbb_presentation_video.renderer.tldraw import vec
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
+
 @attr.s(auto_attribs=True, slots=True)
 class StraightPillSection:
     start: Position
     delta: Position
-    type: str = 'straight'
+    type: str = "straight"
+    center: Position = Position(-1, -1)
+    start_angle: float = 0
 
 
 @attr.s(auto_attribs=True, slots=True)
 class ArcPillSection:
     start_angle: float
     center: Position
-    type: str = 'arc'
+    type: str = "arc"
+    start: Position = Position(-1, -1)
+    delta: Position = Position(-1, -1)
+
 
 class Arc(TypedDict):
     leftPoint: Position
@@ -48,6 +54,7 @@ class Arc(TypedDict):
     arcPoint: Position
     center: Optional[Position]
     radius: float
+
 
 def get_pill_circumference(w: float, h: float) -> float:
     radius = min(w, h) / 2
@@ -71,8 +78,12 @@ def get_pill_points(width: float, height: float, numPoints: int) -> List[Positio
         # Definitions for a horizontally oriented pill
         sections = [
             StraightPillSection(start=Position(radius, 0), delta=Position(1, 0)),
-            ArcPillSection(center=Position(width - radius, radius), start_angle=-tau / 4),
-            StraightPillSection(start=Position(width - radius, height), delta=Position(-1, 0)),
+            ArcPillSection(
+                center=Position(width - radius, radius), start_angle=-tau / 4
+            ),
+            StraightPillSection(
+                start=Position(width - radius, height), delta=Position(-1, 0)
+            ),
             ArcPillSection(center=Position(radius, radius), start_angle=tau / 4),
         ]
     else:
@@ -80,19 +91,23 @@ def get_pill_points(width: float, height: float, numPoints: int) -> List[Positio
         sections = [
             StraightPillSection(start=Position(width, radius), delta=Position(0, 1)),
             ArcPillSection(center=Position(radius, height - radius), start_angle=0),
-            StraightPillSection(start=Position(0, height - radius), delta=Position(0, -1)),
+            StraightPillSection(
+                start=Position(0, height - radius), delta=Position(0, -1)
+            ),
             ArcPillSection(center=Position(radius, radius), start_angle=tau / 2),
         ]
 
-    points = []
-    section_offset = 0
+    points: List[Position] = []
+    section_offset = 0.0
 
     for _ in range(numPoints):
         section = sections[0]
 
         if section.type == "straight":
-            point = vec.add(section.start, vec.mul(section.delta, section_offset))
-            points.append(Position(point[0], point[1]))
+            straight_point = vec.add(
+                section.start, vec.mul(section.delta, section_offset)
+            )
+            points.append(Position(straight_point[0], straight_point[1]))
         else:
             point = get_point_on_circle(
                 section.center, radius, section.start_angle + section_offset / radius
@@ -112,6 +127,7 @@ def get_pill_points(width: float, height: float, numPoints: int) -> List[Positio
 
     return points
 
+
 def switchSize(size: SizeStyle) -> float:
     if size is SizeStyle.S:
         return 50.0
@@ -124,7 +140,10 @@ def switchSize(size: SizeStyle) -> float:
     else:
         return 70.0
 
-def get_cloud_arcs(width: float, height: float, seed: str, size: SizeStyle) -> List[Arc]:
+
+def get_cloud_arcs(
+    width: float, height: float, seed: str, size: SizeStyle
+) -> List[Arc]:
     random = Random(seed)
     pillCircumference = get_pill_circumference(width, height)
 
@@ -156,7 +175,8 @@ def get_cloud_arcs(width: float, height: float, seed: str, size: SizeStyle) -> L
             bumpPoints[i], (random.random() * maxWiggleX, random.random() * maxWiggleY)
         )
         bumpPoints[numBumps - i - 1] = vec.add(
-            bumpPoints[numBumps - i - 1], (random.random() * maxWiggleX, random.random() * maxWiggleY)
+            bumpPoints[numBumps - i - 1],
+            (random.random() * maxWiggleX, random.random() * maxWiggleY),
         )
 
     arcs = []
@@ -181,15 +201,21 @@ def get_cloud_arcs(width: float, height: float, seed: str, size: SizeStyle) -> L
 
         arcPoint = vec.add(midPoint, vec.from_angle(offsetAngle, finalDistance))
 
-        arcPoint_x = 0 if arcPoint[0] < 0 else (width if arcPoint[0] > width else arcPoint[0])
-        arcPoint_y = 0 if arcPoint[1] < 0 else (height if arcPoint[1] > height else arcPoint[1])
+        arcPoint_x = (
+            0 if arcPoint[0] < 0 else (width if arcPoint[0] > width else arcPoint[0])
+        )
+        arcPoint_y = (
+            0 if arcPoint[1] < 0 else (height if arcPoint[1] > height else arcPoint[1])
+        )
         arcPoint = (arcPoint_x, arcPoint_y)
 
-        center = circle_from_three_points(leftWigglePoint, rightWigglePoint, arcPoint)
-        center = (center[0].x, center[0].y)
+        center_pos, _ = circle_from_three_points(
+            leftWigglePoint, rightWigglePoint, arcPoint
+        )
+        center = (center_pos[0], center_pos[1])
 
         radius = vec.dist(
-            center if center else vec.med(leftWigglePoint, rightWigglePoint),
+            center if center_pos else vec.med(leftWigglePoint, rightWigglePoint),
             leftWigglePoint,
         )
 
@@ -198,12 +224,13 @@ def get_cloud_arcs(width: float, height: float, seed: str, size: SizeStyle) -> L
             rightPoint=Position(*rightWigglePoint),
             arcPoint=Position(*arcPoint),
             center=Position(*center) if center is not None else None,
-            radius=radius
+            radius=radius,
         )
 
         arcs.append(arc_dict)
 
     return arcs
+
 
 # def cloud_outline(width, height, seed, size):
 #     path = []
@@ -216,11 +243,13 @@ def get_cloud_arcs(width: float, height: float, seed: str, size: SizeStyle) -> L
 
 #     return path
 
+
 def calculate_angle(center: Position, point: Position) -> float:
     dx = point[0] - center[0]
     dy = point[1] - center[1]
     angle = atan2(dy, dx)
     return angle
+
 
 def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> None:
     style = shape.style
@@ -240,8 +269,13 @@ def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
     ctx.new_sub_path()
 
     for arc in arcs:
-        leftPoint, rightPoint, radius, center = arc['leftPoint'], arc['rightPoint'], arc['radius'], arc['center']
-    
+        leftPoint, rightPoint, radius, center = (
+            arc["leftPoint"],
+            arc["rightPoint"],
+            arc["radius"],
+            arc["center"],
+        )
+
         if center is None:
             # Move to leftPoint and draw a line to rightPoint instead of an arc
             ctx.move_to(*leftPoint)
@@ -250,9 +284,9 @@ def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
             # Calculate start and end angles
             start_angle = calculate_angle(center, leftPoint)
             end_angle = calculate_angle(center, rightPoint)
-            
+
             ctx.arc(center[0], center[1], radius, start_angle, end_angle)
-        
+
     ctx.close_path()
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
