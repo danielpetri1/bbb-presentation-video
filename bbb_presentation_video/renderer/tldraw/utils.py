@@ -651,3 +651,7 @@ def get_polygon_draw_vertices(
 
     points.extend(lines[0])  # Add start point again at the end
     return points
+
+
+def get_point_on_circle(center: Position, radius: float, angle: float) -> Position:
+    return Position(center[0] + radius * cos(angle), center[1] + radius * sin(angle))

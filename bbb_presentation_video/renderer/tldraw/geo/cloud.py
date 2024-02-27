@@ -5,10 +5,10 @@
 # Adapted from: https://github.com/tldraw/tldraw/blob/main/packages/tldraw/src/lib/shapes/geo/cloudOutline.ts
 
 from __future__ import annotations
-from math import atan2, cos, sin, tau
+from math import atan2, tau
 import math
 import attr
-from typing import List, Optional, TypeVar, TypedDict, Union
+from typing import Any, Callable, List, Optional, Tuple, TypeVar, TypedDict, Union
 
 import cairo
 from random import Random
@@ -21,9 +21,11 @@ from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,
+    DashStyle,
     SizeStyle,
     circle_from_three_points,
     get_perfect_dash_props,
+    get_point_on_circle,
 )
 from bbb_presentation_video.renderer.tldraw import vec
 
@@ -60,10 +62,6 @@ def get_pill_circumference(w: float, h: float) -> float:
     radius = min(w, h) / 2
     long_side = max(w, h) - tau
     return tau * radius + 2 * long_side
-
-
-def get_point_on_circle(center: Position, radius: float, angle: float) -> Position:
-    return Position(center[0] + radius * cos(angle), center[1] + radius * sin(angle))
 
 
 def get_pill_points(width: float, height: float, numPoints: int) -> List[Position]:
@@ -232,16 +230,44 @@ def get_cloud_arcs(
     return arcs
 
 
-# def cloud_outline(width, height, seed, size):
-#     path = []
+def clockwise_angle_dist(a0: float, a1: float) -> float:
+    a0 = a0 % tau
+    a1 = a1 % tau
 
-#     arcs = get_cloud_arcs(width, height, seed, size)
+    if a0 > a1:
+        a1 += tau
 
-#     for arc in arcs:
-#         center, radius, leftPoint, rightPoint = arc['center'], arc['radius'], arc['leftPoint'], arc['rightPoint']
-#         path.extend(points_on_arc(leftPoint, rightPoint, center, radius, 10))
+    return a1 - a0
 
-#     return path
+
+def points_on_arc(
+    start_point: Position,
+    end_point: Position,
+    center: Position,
+    radius: float,
+    num_points: int,
+) -> List[Position]:
+    if center is None:
+        return [start_point, end_point]
+
+    results = []
+
+    start_angle = vec.angle(center, start_point)
+    end_angle = vec.angle(center, end_point)
+
+    l = clockwise_angle_dist(start_angle, end_angle)
+
+    for i in range(num_points):
+        t = i / (num_points - 1)
+        angle = start_angle + l * t
+        point = get_point_on_circle(center, radius, angle)
+        results.append(point)
+
+    return results
+
+
+def mutate_point(p: Position, mut_func: Callable[[Any], Any]) -> Position:
+    return Position(mut_func(p[0]), mut_func(p[1]))
 
 
 def calculate_angle(center: Position, point: Position) -> float:
@@ -302,11 +328,86 @@ def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
     ctx.restore()
 
 
+def draw_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> None:
+    random = Random(id)
+
+    stroke_width = STROKE_WIDTHS[shape.style.size]
+    sw = 1 + stroke_width * 1.618
+
+    stroke = STROKES[shape.style.color]
+    ctx.save()
+
+    size_multipliers = {
+        SizeStyle.S: 0.5,
+        SizeStyle.M: 0.7,
+        SizeStyle.L: 0.9,
+        SizeStyle.XL: 1.6,
+    }
+    mut_multiplier = size_multipliers.get(shape.style.size, 1.0)
+    mut = lambda n: n + random.random() * mut_multiplier * 2
+
+    width = max(0, shape.size.width)
+    height = max(0, shape.size.height)
+    arcs = get_cloud_arcs(width, height, id, shape.style.size)
+    avg_arc_length = sum(
+        math.sqrt(
+            (arc["leftPoint"][0] - arc["rightPoint"][0]) ** 2
+            + (arc["leftPoint"][1] - arc["rightPoint"][1]) ** 2
+        )
+        for arc in arcs
+    ) / len(arcs)
+    should_mutate_points = avg_arc_length > mut_multiplier * 15
+
+    ctx.new_sub_path()
+
+    for arc in arcs:
+        leftPoint, rightPoint, radius, center = (
+            arc["leftPoint"],
+            arc["rightPoint"],
+            arc["radius"],
+            arc["center"],
+        )
+
+        if should_mutate_points:
+            leftPoint = mutate_point(leftPoint, mut)
+            rightPoint = mutate_point(rightPoint, mut)
+
+        if center is None:
+            ctx.move_to(*leftPoint)
+            ctx.line_to(*rightPoint)
+        else:
+            start_angle = calculate_angle(center, leftPoint)
+            end_angle = calculate_angle(center, rightPoint)
+
+            if should_mutate_points:
+                center = mutate_point(center, mut)
+                radius += random.random() * mut_multiplier
+
+            ctx.arc(center[0], center[1], radius, start_angle, end_angle)
+
+    ctx.close_path()
+    ctx.set_line_width(sw)
+    ctx.set_line_cap(cairo.LineCap.ROUND)
+    ctx.set_line_join(cairo.LineJoin.ROUND)
+
+    dash_array, dash_offset = get_perfect_dash_props(
+        abs(2 * width + 2 * height), sw, shape.style.dash, snap=2, outset=False
+    )
+
+    ctx.set_dash(dash_array, dash_offset)
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, shape.style.opacity)
+    ctx.stroke()
+    ctx.restore()
+
+
 def finalize_cloud(ctx: cairo.Context[CairoSomeSurface], id: str, shape: Cloud) -> None:
     print(f"\tTldraw: Finalizing Cloud: {id}")
 
     ctx.rotate(shape.rotation)
 
-    dash_cloud(ctx, shape, id)
+    if shape.style.dash is DashStyle.DRAW:
+        draw_cloud(ctx, shape, id)
+    else:
+        dash_cloud(ctx, shape, id)
 
     finalize_v2_label(ctx, shape)
