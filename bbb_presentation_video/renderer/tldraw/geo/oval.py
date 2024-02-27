@@ -5,13 +5,11 @@
 from __future__ import annotations
 
 from math import cos, sin, tau
-from random import Random
-from typing import List, TypeVar, Union
+from typing import List, TypeVar
 
 import cairo
 from bbb_presentation_video.events.helpers import Position
 
-from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import Oval
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (

@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from math import hypot
 from random import Random
 from typing import List, TypeVar
 

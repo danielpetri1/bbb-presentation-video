@@ -5,7 +5,7 @@
 from __future__ import annotations
 from math import cos, sin, tau
 
-from typing import List, Tuple, TypeVar
+from typing import List, TypeVar
 
 import cairo
 import perfect_freehand
