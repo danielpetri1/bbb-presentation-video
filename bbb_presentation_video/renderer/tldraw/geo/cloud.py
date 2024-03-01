@@ -23,6 +23,7 @@ from bbb_presentation_video.renderer.tldraw.utils import (
     STROKES,
     DashStyle,
     SizeStyle,
+    apply_geo_fill,
     circle_from_three_points,
     get_perfect_dash_props,
     get_point_on_circle,
@@ -314,6 +315,11 @@ def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
             ctx.arc(center[0], center[1], radius, start_angle, end_angle)
 
     ctx.close_path()
+
+    if style.isFilled:
+        preserve_path = True
+        apply_geo_fill(ctx, style, preserve_path)
+
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)
@@ -324,11 +330,13 @@ def dash_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
 
     ctx.set_dash(dash_array, dash_offset)
     ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
+
     ctx.stroke()
     ctx.restore()
 
 
 def draw_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> None:
+    style = shape.style
     random = Random(id)
 
     stroke_width = STROKE_WIDTHS[shape.style.size]
@@ -386,6 +394,11 @@ def draw_cloud(ctx: cairo.Context[CairoSomeSurface], shape: Cloud, id: str) -> N
             ctx.arc(center[0], center[1], radius, start_angle, end_angle)
 
     ctx.close_path()
+
+    if style.isFilled:
+        preserve_path = True
+        apply_geo_fill(ctx, style, preserve_path)
+
     ctx.set_line_width(sw)
     ctx.set_line_cap(cairo.LineCap.ROUND)
     ctx.set_line_join(cairo.LineJoin.ROUND)

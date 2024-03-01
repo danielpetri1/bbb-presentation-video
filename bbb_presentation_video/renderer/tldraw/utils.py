@@ -523,7 +523,9 @@ def get_arc_length(C: Position, r: float, A: Position, B: Position) -> float:
     return r * tau * (sweep / tau)
 
 
-def apply_geo_fill(ctx: cairo.Context[CairoSomeSurface], style: Style) -> None:
+def apply_geo_fill(
+    ctx: cairo.Context[CairoSomeSurface], style: Style, preserve_path: bool = False
+) -> None:
     fill = FILLS[style.color]
 
     if style.fill is FillStyle.SEMI:
@@ -537,7 +539,10 @@ def apply_geo_fill(ctx: cairo.Context[CairoSomeSurface], style: Style) -> None:
     else:
         ctx.set_source_rgba(fill.r, fill.g, fill.b, style.opacity)
 
-    ctx.fill()
+    if preserve_path:
+        ctx.fill_preserve()
+    else:
+        ctx.fill()
 
 
 def finalize_geo_path(
