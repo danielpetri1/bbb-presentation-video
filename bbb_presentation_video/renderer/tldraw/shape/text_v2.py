@@ -13,8 +13,7 @@ from bbb_presentation_video.events.helpers import Position, Size
 from bbb_presentation_video.renderer.tldraw.shape import (
     LabelledShapeProto,
     StickyShape,
-    TextShape,
-    apply_shape_rotation,
+    TextShape_v2,
 )
 from bbb_presentation_video.renderer.tldraw.utils import (
     FONT_FACES,
@@ -150,22 +149,107 @@ def get_layout_size(layout: Pango.Layout, *, padding: float = 0) -> Size:
     return Size(width + padding * 2, height + padding * 2)
 
 
-def finalize_text(
-    ctx: cairo.Context[CairoSomeSurface], id: str, shape: TextShape
+def finalize_v2_text(
+    ctx: cairo.Context[CairoSomeSurface], id: str, shape: TextShape_v2
 ) -> None:
-    print(f"\tTldraw: Finalizing Text: {id}")
-
-    apply_shape_rotation(ctx, shape)
+    print(f"\tTldraw: Finalizing Text (v2): {id}")
 
     style = shape.style
+    ctx.rotate(shape.rotation)
+
     stroke = STROKES[style.color]
     font_size = FONT_SIZES[style.size]
 
     layout = create_pango_layout(ctx, style, font_size)
     layout.set_text(shape.text, -1)
+    
+    border_thickness = 2
+    border_color = (1, 1, 1, 1)  # White
+    # Draw the border by offsetting the text in several directions
+    offsets = [
+        (-border_thickness, -border_thickness),
+        (border_thickness, -border_thickness),
+        (-border_thickness, border_thickness),
+        (border_thickness, border_thickness),
+    ]
 
-    ctx.set_source_rgb(stroke.r, stroke.g, stroke.b)
+    for dx, dy in offsets:
+        ctx.translate(dx, dy)
+        ctx.set_source_rgba(*border_color)
+        show_layout_by_lines(ctx, layout, padding=4)
+        ctx.translate(-dx, -dy)  # Reset translation for next iteration
+
+    ctx.set_source_rgba(stroke.r, stroke.g, stroke.b, style.opacity)
     show_layout_by_lines(ctx, layout, padding=4)
+
+
+def finalize_v2_label(
+    ctx: cairo.Context[CairoSomeSurface],
+    shape: LabelledShapeProto,
+    *,
+    offset: Optional[Position] = None,
+) -> Size:
+    if shape.label is None or shape.label == "":
+        return Size(16, 32)
+
+    print(f"\t\tFinalizing Label (v2)")
+
+    style = shape.style
+    stroke = STROKES[ColorStyle.BLACK]  # v2 labels are always black
+    border_color = (1, 1, 1, 1)  # White
+    font_size = FONT_SIZES[style.size]
+
+    ctx.save()
+
+    # Create layout aligning the text horizontally within the shape
+    style.textAlign = shape.align
+    layout = create_pango_layout(
+        ctx, style, font_size, width=shape.size.width, padding=4
+    )
+    layout.set_text(shape.label, -1)
+
+    label_size = get_layout_size(layout, padding=4)
+    bounds = shape.size
+
+    if offset is None:
+        offset = shape.label_offset()
+
+    x = offset.x
+
+    # Align text vertically in the shape
+    if shape.verticalAlign == AlignStyle.START:
+        y = offset.y
+    elif shape.verticalAlign == AlignStyle.END:
+        y = bounds.height - label_size.height + offset.y
+    else:
+        y = bounds.height / 2 - label_size.height / 2 + offset.y
+
+    border_thickness = 2
+
+    # Draw the border by offsetting the text in several directions
+    offsets = [
+        (-border_thickness, -border_thickness),
+        (border_thickness, -border_thickness),
+        (-border_thickness, border_thickness),
+        (border_thickness, border_thickness),
+    ]
+
+    for dx, dy in offsets:
+        ctx.translate(x + dx, y + dy)
+        ctx.set_source_rgba(*border_color)
+        show_layout_by_lines(ctx, layout, padding=4)
+        ctx.translate(-x - dx, -y - dy)  # Reset translation for next iteration
+
+    # Draw the original text on top
+    ctx.translate(x, y)
+    ctx.set_source_rgba(
+        stroke.r, stroke.g, stroke.b, style.opacity
+    )  # Set original text color
+    show_layout_by_lines(ctx, layout, padding=4)
+
+    ctx.restore()
+
+    return label_size
 
 
 def finalize_label(

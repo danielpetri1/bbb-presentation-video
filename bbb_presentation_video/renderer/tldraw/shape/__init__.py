@@ -279,6 +279,16 @@ class TextShape(RotatableShapeProto):
         if "text" in data:
             self.text = data["text"]
 
+@attr.s(order=False, slots=True, auto_attribs=True)
+class TextShape_v2(RotatableShapeProto):
+    text: str = ""
+
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
+        if "props" in data:
+            if "text" in data["props"]:
+                self.text = data["props"]["text"]
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class Rhombus(LabelledShapeProto):
@@ -506,6 +516,7 @@ Shape = Union[
     RectangleShape,
     StickyShape,
     TextShape,
+    TextShape_v2,
     Trapezoid,
     TriangleGeo,
     TriangleShape,
@@ -538,7 +549,10 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         else:
             return ArrowShape_v2.from_data(data)
     elif type == "text":
-        return TextShape.from_data(data)
+        if not is_tldraw_v2:
+            return TextShape.from_data(data)
+        else:
+            return TextShape_v2.from_data(data)
     elif type == "group":
         return GroupShape.from_data(data)
     elif type == "sticky":
@@ -547,6 +561,8 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         return LineShape.from_data(data)
     elif type == "highlight":
         return HighlighterShape.from_data(data)
+    elif type == "note":
+        return StickyShape.from_data(data)
     elif type == "geo":
         if "geo" in data["props"]:
             geo_type = GeoShape(data["props"]["geo"])

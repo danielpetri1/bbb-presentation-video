@@ -14,7 +14,7 @@ from bbb_presentation_video.events.helpers import Position
 
 from bbb_presentation_video.renderer.tldraw import vec
 from bbb_presentation_video.renderer.tldraw.shape import ArrowGeo
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
+from bbb_presentation_video.renderer.tldraw.shape.text_v2 import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,

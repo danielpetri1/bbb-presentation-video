@@ -51,6 +51,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     Star,
     StickyShape,
     TextShape,
+    TextShape_v2,
     Trapezoid,
     TriangleShape,
     TriangleGeo,
@@ -67,6 +68,7 @@ from bbb_presentation_video.renderer.tldraw.shape.line import finalize_line
 from bbb_presentation_video.renderer.tldraw.shape.rectangle import finalize_rectangle
 from bbb_presentation_video.renderer.tldraw.shape.sticky import finalize_sticky
 from bbb_presentation_video.renderer.tldraw.shape.text import finalize_text
+from bbb_presentation_video.renderer.tldraw.shape.text_v2 import finalize_v2_text
 from bbb_presentation_video.renderer.tldraw.shape.triangle import finalize_triangle
 from packaging.version import Version
 
@@ -313,6 +315,8 @@ class TldrawRenderer(Generic[CairoSomeSurface]):
                     finalize_triangle(ctx, id, shape)
                 elif isinstance(shape, TextShape):
                     finalize_text(ctx, id, shape)
+                elif isinstance(shape, TextShape_v2):
+                    finalize_v2_text(ctx, id, shape)
                 elif isinstance(shape, StickyShape):
                     finalize_sticky(ctx, shape)
                 elif isinstance(shape, XBox):

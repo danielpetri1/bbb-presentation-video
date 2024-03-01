@@ -11,7 +11,7 @@ import cairo
 from bbb_presentation_video.events.helpers import Position
 
 from bbb_presentation_video.renderer.tldraw.shape import Oval
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
+from bbb_presentation_video.renderer.tldraw.shape.text_v2 import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     finalize_geo_path,
 )

@@ -18,7 +18,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     RectangleGeo,
     XBox,
 )
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
+from bbb_presentation_video.renderer.tldraw.shape.text_v2 import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,

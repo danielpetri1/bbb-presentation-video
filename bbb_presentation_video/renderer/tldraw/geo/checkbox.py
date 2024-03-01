@@ -15,7 +15,7 @@ from bbb_presentation_video.renderer.tldraw.shape import (
 from bbb_presentation_video.renderer.tldraw.geo.rectangle import (
     rectangle_stroke_points,
 )
-from bbb_presentation_video.renderer.tldraw.shape.text import finalize_v2_label
+from bbb_presentation_video.renderer.tldraw.shape.text_v2 import finalize_v2_label
 from bbb_presentation_video.renderer.tldraw.utils import (
     STROKE_WIDTHS,
     STROKES,
