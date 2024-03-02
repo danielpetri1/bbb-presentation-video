@@ -13,7 +13,11 @@ from bbb_presentation_video.renderer.tldraw.shape import (
     StickyShape_v2,
     TextShape_v2,
 )
-from bbb_presentation_video.renderer.tldraw.shape.text import create_pango_layout, get_layout_size, show_layout_by_lines
+from bbb_presentation_video.renderer.tldraw.shape.text import (
+    create_pango_layout,
+    get_layout_size,
+    show_layout_by_lines,
+)
 from bbb_presentation_video.renderer.tldraw.utils import (
     FONT_SIZES,
     STICKY_FONT_SIZES,
@@ -32,6 +36,7 @@ DPI: float = 72.0
 
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
+
 def finalize_v2_text(
     ctx: cairo.Context[CairoSomeSurface], id: str, shape: TextShape_v2
 ) -> None:
@@ -45,7 +50,7 @@ def finalize_v2_text(
 
     layout = create_pango_layout(ctx, style, font_size)
     layout.set_text(shape.text, -1)
-    
+
     border_thickness = 2
     border_color = (1, 1, 1, 1)  # White
     # Draw the border by offsetting the text in several directions
@@ -134,6 +139,7 @@ def finalize_v2_label(
 
     return label_size
 
+
 def finalize_sticky_text_v2(
     ctx: cairo.Context[CairoSomeSurface], shape: StickyShape_v2
 ) -> None:
@@ -163,5 +169,7 @@ def finalize_sticky_text_v2(
         y = shape.size.height - text_height
     ctx.translate(x, y)
 
-    ctx.set_source_rgba(STICKY_TEXT_COLOR.r, STICKY_TEXT_COLOR.g, STICKY_TEXT_COLOR.b, style.opacity)
+    ctx.set_source_rgba(
+        STICKY_TEXT_COLOR.r, STICKY_TEXT_COLOR.g, STICKY_TEXT_COLOR.b, style.opacity
+    )
     show_layout_by_lines(ctx, layout, padding=STICKY_PADDING)

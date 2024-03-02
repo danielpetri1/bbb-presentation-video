@@ -22,9 +22,11 @@ from bbb_presentation_video.renderer.tldraw.utils import (
 CairoSomeSurface = TypeVar("CairoSomeSurface", bound=cairo.Surface)
 
 
-def finalize_sticky_v2(ctx: cairo.Context[CairoSomeSurface], shape: StickyShape_v2) -> None:
+def finalize_sticky_v2(
+    ctx: cairo.Context[CairoSomeSurface], shape: StickyShape_v2
+) -> None:
     style = shape.style
-    
+
     if style.color is ColorStyle.BLACK:
         style.color = ColorStyle.YELLOW
 

@@ -279,6 +279,7 @@ class TextShape(RotatableShapeProto):
         if "text" in data:
             self.text = data["text"]
 
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class TextShape_v2(RotatableShapeProto):
     text: str = ""
@@ -289,6 +290,7 @@ class TextShape_v2(RotatableShapeProto):
         if "props" in data:
             if "text" in data["props"]:
                 self.text = data["props"]["text"]
+
 
 @attr.s(order=False, slots=True, auto_attribs=True)
 class Rhombus(LabelledShapeProto):
@@ -348,6 +350,7 @@ class StickyShape(RotatableShapeProto):
         if "text" in data:
             self.text = data["text"]
 
+
 @attr.s(order=False, slots=True, auto_attribs=True)
 class StickyShape_v2(RotatableShapeProto):
     text: str = ""
@@ -370,6 +373,7 @@ class StickyShape_v2(RotatableShapeProto):
                 self.size = Size(self.size.width, self.size.height + props["growY"])
                 if props["growY"] != 0:
                     self.verticalAlign = AlignStyle.START
+
 
 @attr.s(order=False, slots=True, auto_attribs=True, init=False)
 class ArrowHandles:
