@@ -348,6 +348,28 @@ class StickyShape(RotatableShapeProto):
         if "text" in data:
             self.text = data["text"]
 
+@attr.s(order=False, slots=True, auto_attribs=True)
+class StickyShape_v2(RotatableShapeProto):
+    text: str = ""
+    align: AlignStyle = AlignStyle.MIDDLE
+    verticalAlign: AlignStyle = AlignStyle.MIDDLE
+    size: Size = Size(200.0, 200.0)
+
+    def update_from_data(self, data: ShapeData) -> None:
+        super().update_from_data(data)
+
+        if "props" in data:
+            props = data["props"]
+            if "text" in props:
+                self.text = props["text"]
+            if "align" in props:
+                self.align = AlignStyle(props["align"])
+            if "verticalAlign" in props:
+                self.verticalAlign = AlignStyle(props["verticalAlign"])
+            if "growY" in props:
+                self.size = Size(self.size.width, self.size.height + props["growY"])
+                if props["growY"] != 0:
+                    self.verticalAlign = AlignStyle.START
 
 @attr.s(order=False, slots=True, auto_attribs=True, init=False)
 class ArrowHandles:
@@ -515,6 +537,7 @@ Shape = Union[
     RectangleGeo,
     RectangleShape,
     StickyShape,
+    StickyShape_v2,
     TextShape,
     TextShape_v2,
     Trapezoid,
@@ -557,12 +580,12 @@ def parse_shape_from_data(data: ShapeData, bbb_version: Version) -> Shape:
         return GroupShape.from_data(data)
     elif type == "sticky":
         return StickyShape.from_data(data)
+    elif type == "note":
+        return StickyShape_v2.from_data(data)
     elif type == "line":
         return LineShape.from_data(data)
     elif type == "highlight":
         return HighlighterShape.from_data(data)
-    elif type == "note":
-        return StickyShape.from_data(data)
     elif type == "geo":
         if "geo" in data["props"]:
             geo_type = GeoShape(data["props"]["geo"])
