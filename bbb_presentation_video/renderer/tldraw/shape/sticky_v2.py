@@ -31,7 +31,7 @@ def finalize_sticky_v2(
         style.color = ColorStyle.YELLOW
 
     fill = STICKY_FILLS[style.color]
-
+    ctx.rotate(shape.rotation)
     # Shadow. Doing blurred shadow is hard, so this is a simple offset drop shadow + border instead
     ctx.save()
     ctx.translate(-1.0, -1.0)
