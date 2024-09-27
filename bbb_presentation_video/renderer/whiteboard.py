@@ -636,7 +636,7 @@ class ShapesRenderer(Generic[CairoSomeSurface]):
                 elif type == "text":
                     self.draw_text(shape)
                 elif type == "poll_result":
-                    self.draw_poll_result(shape)
+                    continue
                 else:
                     print(f"\tShapes: don't know how to draw {type}")
                 ctx.restore()
